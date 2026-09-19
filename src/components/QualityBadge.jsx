@@ -1,3 +1,5 @@
+import React from "react";
+
 function QualityBadge({ status }) {
 
     const value = status?.toLowerCase();
