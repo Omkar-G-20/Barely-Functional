@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import {
@@ -6,12 +6,14 @@ import {
     ScanSearch,
     History,
     FileText,
-    User,
-    Settings,
-    LogOut
+    Leaf,
+    Menu,
+    X
 } from "lucide-react";
 
 function Sidebar() {
+
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     const menu = [
         {
@@ -33,63 +35,58 @@ function Sidebar() {
             name: "Reports",
             path: "/report",
             icon: FileText
-        },
-        {
-            name: "Profile",
-            path: "/profile",
-            icon: User
-        },
-        {
-            name: "Settings",
-            path: "/settings",
-            icon: Settings
         }
     ];
 
     return (
-        <aside className="sidebar">
+        <>
+            {/* Mobile hamburger toggle (visible only on small screens) */}
+            <button
+                className="sidebar-hamburger"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Toggle menu"
+            >
+                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
 
-            <div className="sidebar-logo">
-                <div className="brand-icon">
-                    🌱
+            {/* Mobile overlay */}
+            {mobileOpen && (
+                <div
+                    className="sidebar-overlay"
+                    onClick={() => setMobileOpen(false)}
+                />
+            )}
+
+            <aside className={`sidebar ${mobileOpen ? "sidebar-mobile-open" : ""}`}>
+
+                <div className="sidebar-logo">
+                    <div className="brand-icon">
+                        <Leaf size={18} />
+                    </div>
+                    <span>Agri<strong>Feed</strong> AI</span>
                 </div>
 
-                <span>AgriSense AI</span>
-            </div>
+                <div className="sidebar-menu">
+                    {menu.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                            <NavLink
+                                key={item.name}
+                                to={item.path}
+                                onClick={() => setMobileOpen(false)}
+                                className={({ isActive }) =>
+                                    isActive ? "side-link active" : "side-link"
+                                }
+                            >
+                                <Icon size={19} />
+                                <span>{item.name}</span>
+                            </NavLink>
+                        );
+                    })}
+                </div>
 
-            <div className="sidebar-menu">
-
-                {menu.map((item) => {
-
-                    const Icon = item.icon;
-
-                    return (
-                        <NavLink
-                            key={item.name}
-                            to={item.path}
-                            className={({ isActive }) =>
-                                isActive ? "side-link active" : "side-link"
-                            }
-                        >
-                            <Icon size={19} />
-                            <span>{item.name}</span>
-                        </NavLink>
-                    );
-
-                })}
-
-            </div>
-
-            <div className="sidebar-bottom">
-
-                <NavLink to="/" className="side-link logout">
-                    <LogOut size={19} />
-                    <span>Logout</span>
-                </NavLink>
-
-            </div>
-
-        </aside>
+            </aside>
+        </>
     );
 }
 

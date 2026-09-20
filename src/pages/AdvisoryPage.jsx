@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
+import AppHeader from "../components/AppHeader";
 
 function AdvisoryPage() {
 
@@ -13,6 +14,8 @@ function AdvisoryPage() {
         <div className="app-layout">
 
             <Sidebar />
+
+            <AppHeader />
 
             <main className="advisory-main">
 

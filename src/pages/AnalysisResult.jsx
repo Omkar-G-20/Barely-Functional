@@ -12,6 +12,7 @@ import {
 } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
+import AppHeader from "../components/AppHeader";
 import QualityBadge from "../components/QualityBadge";
 
 function AnalysisResult() {
@@ -20,6 +21,8 @@ function AnalysisResult() {
         <div className="app-layout">
 
             <Sidebar />
+
+            <AppHeader />
 
             <main className="result-main">
 

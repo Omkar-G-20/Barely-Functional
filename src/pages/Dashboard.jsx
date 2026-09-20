@@ -10,10 +10,12 @@ import {
 import { Link } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
+import AppHeader from "../components/AppHeader";
 import StatCard from "../components/StatCard";
 import TestCard from "../components/TestCard";
 
 import { recentTests } from "../data/mockData";
+
 
 function Dashboard() {
 
@@ -22,22 +24,16 @@ function Dashboard() {
 
             <Sidebar />
 
+            <AppHeader />
+
+
             <main className="dashboard-main">
 
                 <header className="dashboard-header">
-
                     <div>
-                        <p className="dashboard-label">
-                            DASHBOARD
-                        </p>
-
-                        <h1>
-                            Good morning, Farmer 👋
-                        </h1>
-
-                        <p>
-                            Here's your quality analysis overview.
-                        </p>
+                        <p className="dashboard-label">DASHBOARD</p>
+                        <h1>Good morning, Farmer 👋</h1>
+                        <p>Here's your quality analysis overview.</p>
                     </div>
 
                     <Link
@@ -47,7 +43,6 @@ function Dashboard() {
                         <ScanSearch size={18} />
                         New Analysis
                     </Link>
-
                 </header>
 
                 <section className="stats-grid">

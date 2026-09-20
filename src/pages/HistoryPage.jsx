@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
+import AppHeader from "../components/AppHeader";
 import QualityBadge from "../components/QualityBadge";
 
 import { testHistory } from "../data/mockData";
@@ -15,6 +16,8 @@ function HistoryPage() {
         <div className="app-layout">
 
             <Sidebar />
+
+            <AppHeader />
 
             <main className="dashboard-main">
 

@@ -177,9 +177,13 @@ button {
 
     padding: 0 8px 30px;
 
-    font-size: 19px;
-    font-weight: 750;
+    font-size: 17px;
+    font-weight: 700;
     color: var(--dark);
+}
+
+.sidebar-logo strong {
+    color: var(--primary);
 }
 
 .sidebar-menu {
@@ -209,14 +213,6 @@ button {
     color: var(--primary);
 }
 
-.sidebar-bottom {
-    margin-top: auto;
-}
-
-.logout:hover {
-    color: var(--poor);
-    background: #ffebee;
-}
 
 /* DASHBOARD */
 
@@ -226,6 +222,7 @@ button {
     width: calc(100% - 245px);
 
     padding: 35px 45px;
+    padding-top: calc(64px + 35px);
 }
 
 .dashboard-header,
@@ -566,6 +563,7 @@ button {
     width: calc(100% - 245px);
 
     padding: 35px 55px;
+    padding-top: calc(64px + 35px);
 }
 
 .back-link {
@@ -747,6 +745,135 @@ button {
 
     object-fit: contain;
 }
+
+/* Upload box hover */
+.upload-box:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+/* Error state — red dashed border */
+.upload-box-error {
+    border-color: #c62828 !important;
+    background: #fff8f8 !important;
+    color: #c62828;
+    animation: shake 0.35s ease;
+}
+
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%      { transform: translateX(-6px); }
+    75%      { transform: translateX(6px); }
+}
+
+/* Filled state — green border */
+.upload-box-filled {
+    border-style: solid;
+    border-color: var(--primary);
+    padding: 0;
+}
+
+/* Upload icon wrapper */
+.upload-icon-wrap {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    border-radius: 16px;
+    color: var(--primary);
+}
+
+.upload-icon-error {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* Upload panel header row */
+.upload-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.upload-required-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    background: #ffebee;
+    color: #c62828;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 20px;
+}
+
+/* Error message below upload box */
+.upload-error-msg {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin-top: 10px;
+    padding: 10px 14px;
+
+    background: #ffebee;
+    border-radius: 8px;
+
+    color: #c62828;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Change image button */
+.change-image-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    margin-top: 12px;
+    padding: 9px 16px;
+
+    background: var(--primary-light);
+    color: var(--primary);
+
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.change-image-btn:hover {
+    background: #d2eed2;
+}
+
+/* Analyze button — disabled state */
+.analyze-btn-disabled {
+    background: #ccc !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+.analyze-btn-disabled:hover {
+    background: #ccc !important;
+    transform: none !important;
+}
+
+/* Hint text below disabled analyze button */
+.analyze-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    margin-top: 10px;
+
+    color: var(--muted);
+    font-size: 12px;
+}
+
 
 .camera-button {
     width: 100%;

@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Leaf } from "lucide-react";
+import { Leaf, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 function RegisterPage() {
-
     const navigate = useNavigate();
 
     const [form, setForm] = useState({
@@ -11,169 +10,194 @@ function RegisterPage() {
         email: "",
         phone: "",
         password: "",
-        confirmPassword: ""
+        confirmPassword: "",
+        agreeTerms: false
     });
 
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    const validate = () => {
+        const newErrors = {};
+        if (!form.name.trim()) newErrors.name = "Full name is required.";
+        if (!form.phone.trim()) newErrors.phone = "Mobile number is required.";
+        if (!form.password) newErrors.password = "Password is required.";
+        if (!form.confirmPassword) newErrors.confirmPassword = "Please confirm your password.";
+        if (form.password && form.confirmPassword && form.password !== form.confirmPassword) {
+            newErrors.confirmPassword = "Passwords do not match.";
+        }
+        if (!form.agreeTerms) newErrors.agreeTerms = "You must agree to the Terms and Privacy Policy.";
+        return newErrors;
+    };
+
     const handleSubmit = (e) => {
-
         e.preventDefault();
-
-        if (
-            form.password !==
-            form.confirmPassword
-        ) {
-            alert("Passwords do not match.");
+        const errs = validate();
+        if (Object.keys(errs).length > 0) {
+            setErrors(errs);
             return;
         }
-
         navigate("/dashboard");
     };
 
-    return (
-        <div className="auth-page">
+    const update = (field) => (e) =>
+        setForm({ ...form, [field]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
 
-            <div className="auth-brand">
-                <Leaf size={22} />
-                AgriSense AI
+    return (
+        <div className="af-auth-page">
+
+            {/* LEFT — image panel */}
+            <div className="af-auth-left">
+                <div className="af-auth-left-overlay" />
+
+                <div className="af-auth-left-content">
+                    <Link to="/" className="af-back-home">
+                        ← Back to home
+                    </Link>
+
+                    <div className="af-auth-left-tagline">
+                        <div className="af-auth-badge">
+                            <Leaf size={13} /> SMARTER FARMING
+                        </div>
+                        <h2>
+                            Better feed<br />
+                            starts with<br />
+                            <span>better insight.</span>
+                        </h2>
+                        <p>
+                            Use AI-powered analysis to understand feed and silage
+                            quality with simple, farmer-friendly recommendations.
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <div className="auth-container register-container">
+            {/* RIGHT — form panel */}
+            <div className="af-auth-right">
+                <div className="af-auth-form-wrap">
 
-                <div className="auth-left">
+                    <div className="af-auth-logo">
+                        <div className="af-logo-icon"><Leaf size={18} /></div>
+                        <span>Agri<strong>Feed</strong> AI</span>
+                    </div>
 
-                    <div className="auth-content">
+                    <h1>Create your account</h1>
+                    <p className="af-auth-sub">Start analyzing feed and silage quality.</p>
 
-                        <span className="auth-label">
-                            GET STARTED
-                        </span>
+                    <form onSubmit={handleSubmit} noValidate>
 
-                        <h1>
-                            Create your
-                            <span> account</span>
-                        </h1>
-
-                        <p>
-                            Start analyzing feed and silage
-                            samples using AgriSense AI.
-                        </p>
-
-                        <form onSubmit={handleSubmit}>
-
-                            <label>Full Name</label>
-
+                        {/* Full Name */}
+                        <div className="af-field">
+                            <label htmlFor="reg-name">
+                                Full Name <span className="af-required">*</span>
+                            </label>
                             <input
+                                id="reg-name"
                                 type="text"
-                                placeholder="Enter your name"
+                                placeholder="Enter your full name"
                                 value={form.name}
-                                onChange={(e) =>
-                                    setForm({
-                                        ...form,
-                                        name: e.target.value
-                                    })
-                                }
-                                required
+                                onChange={update("name")}
+                                className={errors.name ? "af-input af-input-error" : "af-input"}
                             />
+                            {errors.name && <span className="af-error">{errors.name}</span>}
+                        </div>
 
-                            <label>Email Address</label>
-
+                        {/* Email — optional */}
+                        <div className="af-field">
+                            <label htmlFor="reg-email">Email Address</label>
                             <input
+                                id="reg-email"
                                 type="email"
-                                placeholder="Enter your email"
+                                placeholder="you@example.com"
                                 value={form.email}
-                                onChange={(e) =>
-                                    setForm({
-                                        ...form,
-                                        email: e.target.value
-                                    })
-                                }
-                                required
+                                onChange={update("email")}
+                                className="af-input"
                             />
+                        </div>
 
-                            <label>Mobile Number</label>
-
+                        {/* Mobile */}
+                        <div className="af-field">
+                            <label htmlFor="reg-phone">
+                                Mobile Number <span className="af-required">*</span>
+                            </label>
                             <input
+                                id="reg-phone"
                                 type="tel"
-                                placeholder="Enter mobile number"
+                                placeholder="+91 XXXXX XXXXX"
                                 value={form.phone}
-                                onChange={(e) =>
-                                    setForm({
-                                        ...form,
-                                        phone: e.target.value
-                                    })
-                                }
+                                onChange={update("phone")}
+                                className={errors.phone ? "af-input af-input-error" : "af-input"}
                             />
+                            {errors.phone && <span className="af-error">{errors.phone}</span>}
+                        </div>
 
-                            <label>Password</label>
+                        {/* Password */}
+                        <div className="af-field">
+                            <label htmlFor="reg-password">
+                                Password <span className="af-required">*</span>
+                            </label>
+                            <div className="af-password-wrap">
+                                <input
+                                    id="reg-password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Create a password"
+                                    value={form.password}
+                                    onChange={update("password")}
+                                    className={errors.password ? "af-input af-input-error" : "af-input"}
+                                />
+                                <button type="button" className="af-eye-btn" onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                                </button>
+                            </div>
+                            {errors.password && <span className="af-error">{errors.password}</span>}
+                        </div>
 
-                            <input
-                                type="password"
-                                placeholder="Create password"
-                                value={form.password}
-                                onChange={(e) =>
-                                    setForm({
-                                        ...form,
-                                        password: e.target.value
-                                    })
-                                }
-                                required
-                            />
+                        {/* Confirm Password */}
+                        <div className="af-field">
+                            <label htmlFor="reg-confirm">
+                                Confirm Password <span className="af-required">*</span>
+                            </label>
+                            <div className="af-password-wrap">
+                                <input
+                                    id="reg-confirm"
+                                    type={showConfirm ? "text" : "password"}
+                                    placeholder="Re-enter your password"
+                                    value={form.confirmPassword}
+                                    onChange={update("confirmPassword")}
+                                    className={errors.confirmPassword ? "af-input af-input-error" : "af-input"}
+                                />
+                                <button type="button" className="af-eye-btn" onClick={() => setShowConfirm(!showConfirm)}>
+                                    {showConfirm ? <EyeOff size={17} /> : <Eye size={17} />}
+                                </button>
+                            </div>
+                            {errors.confirmPassword && <span className="af-error">{errors.confirmPassword}</span>}
+                        </div>
 
-                            <label>Confirm Password</label>
+                        {/* Terms */}
+                        <div className="af-terms-row">
+                            <label className="af-checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={form.agreeTerms}
+                                    onChange={update("agreeTerms")}
+                                />
+                                <span>I agree to the <a href="#">Terms and Privacy Policy.</a></span>
+                            </label>
+                            {errors.agreeTerms && <span className="af-error">{errors.agreeTerms}</span>}
+                        </div>
 
-                            <input
-                                type="password"
-                                placeholder="Confirm password"
-                                value={form.confirmPassword}
-                                onChange={(e) =>
-                                    setForm({
-                                        ...form,
-                                        confirmPassword: e.target.value
-                                    })
-                                }
-                                required
-                            />
+                        <button type="submit" className="af-submit-btn">
+                            Create Account <ArrowRight size={16} />
+                        </button>
 
-                            <button
-                                type="submit"
-                                className="primary-button full"
-                            >
-                                Create Account
-                            </button>
+                    </form>
 
-                        </form>
-
-                        <p className="auth-switch">
-                            Already have an account?
-
-                            <Link to="/login">
-                                Login
-                            </Link>
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div className="auth-right">
-
-                    <div className="auth-illustration">
-                        🌱
-                    </div>
-
-                    <h2>
-                        Start smarter
-                        <br />
-                        farm management.
-                    </h2>
-
-                    <p>
-                        Keep your quality analysis,
-                        recommendations and test history
-                        in one place.
+                    <p className="af-switch">
+                        Already have an account? <Link to="/login">Sign in</Link>
                     </p>
 
                 </div>
-
             </div>
 
         </div>

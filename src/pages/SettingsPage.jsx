@@ -1,5 +1,6 @@
 import React from "react";
 import Sidebar from "../components/Sidebar";
+import AppHeader from "../components/AppHeader";
 
 function SettingsPage() {
 
@@ -7,6 +8,8 @@ function SettingsPage() {
         <div className="app-layout">
 
             <Sidebar />
+
+            <AppHeader />
 
             <main className="dashboard-main">
 

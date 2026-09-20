@@ -1,5 +1,299 @@
-@media (max-width: 1100px) {
+/* =============================================
+   APP HEADER — top bar with profile dropdown
+   ============================================= */
 
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 245px;
+    right: 0;
+    z-index: 90;
+
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    padding: 0 32px;
+
+    background: white;
+    border-bottom: 1px solid var(--border);
+
+    gap: 16px;
+}
+
+/* Mobile brand (hidden on desktop) */
+.app-header-brand {
+    display: none;
+    align-items: center;
+    gap: 9px;
+    color: var(--dark);
+    font-size: 16px;
+    font-weight: 700;
+    flex: 1;
+}
+
+.app-header-brand strong {
+    color: var(--primary);
+}
+
+/* PROFILE TRIGGER BUTTON */
+.profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 7px 14px 7px 7px;
+
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+
+    cursor: pointer;
+
+    transition: box-shadow 0.2s;
+}
+
+.profile-trigger:hover {
+    box-shadow: 0 2px 10px rgba(47,125,50,0.15);
+}
+
+.profile-avatar {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--primary);
+    border-radius: 50%;
+
+    color: white;
+}
+
+.profile-name {
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--dark);
+}
+
+.profile-chevron {
+    color: var(--muted);
+    transition: transform 0.2s;
+}
+
+.profile-chevron.open {
+    transform: rotate(180deg);
+}
+
+/* DROPDOWN */
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 24px;
+
+    width: 230px;
+
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+
+    overflow: hidden;
+
+    animation: dropIn 0.15s ease;
+}
+
+@keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 16px;
+}
+
+.dropdown-avatar {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--primary-light);
+    color: var(--primary);
+
+    border-radius: 50%;
+
+    flex-shrink: 0;
+}
+
+.dropdown-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.dropdown-email {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    width: 100%;
+
+    padding: 12px 16px;
+
+    background: none;
+    border: none;
+
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 550;
+
+    cursor: pointer;
+    text-decoration: none;
+
+    transition: background 0.15s, color 0.15s;
+}
+
+.dropdown-item:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.dropdown-logout {
+    color: #c62828;
+}
+
+.dropdown-logout:hover {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* Adjust main content to account for top bar */
+.dashboard-main,
+.analysis-main,
+.result-main,
+.advisory-main {
+    padding-top: calc(64px + 30px);
+}
+
+.dashboard-top-action {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 24px;
+}
+
+/* =============================================
+   SIDEBAR — mobile hamburger & slide-in
+   ============================================= */
+
+.sidebar-hamburger {
+    display: none;
+
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 200;
+
+    width: 40px;
+    height: 40px;
+
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    align-items: center;
+    justify-content: center;
+
+    color: var(--dark);
+    cursor: pointer;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 140;
+}
+
+/* =============================================
+   RESPONSIVE — TABLET (≤ 900px)
+   ============================================= */
+
+@media (max-width: 900px) {
+
+    /* Sidebar becomes slide-in drawer */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        bottom: 0;
+        z-index: 150;
+
+        width: 245px;
+
+        transition: left 0.28s ease;
+
+        box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.sidebar-mobile-open {
+        left: 0;
+    }
+
+    .sidebar-overlay {
+        display: block;
+    }
+
+    .sidebar-hamburger {
+        display: flex;
+    }
+
+    /* Header spans full width on mobile */
+    .app-header {
+        left: 0;
+    }
+
+    .app-header-brand {
+        display: flex;
+    }
+
+    /* Main content no longer offset by sidebar */
+    .dashboard-main,
+    .analysis-main,
+    .result-main,
+    .advisory-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    /* Stats 2-col on tablet */
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -7,186 +301,183 @@
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
-
-    .features-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .steps {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .hero {
-        grid-template-columns: 1fr;
-    }
-
-    .hero-content {
-        text-align: center;
-        margin: auto;
-    }
-
-    .hero-content>p {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .hero-buttons {
-        justify-content: center;
-    }
-
-    .hero-stats {
-        justify-content: center;
-    }
-
-    .analysis-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .advice-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
-@media (max-width: 800px) {
+/* =============================================
+   RESPONSIVE — MOBILE PHONE (≤ 600px)
+   ============================================= */
 
-    .sidebar {
-        width: 70px;
+@media (max-width: 600px) {
+
+    /* App header tighter on phones */
+    .app-header {
+        height: 58px;
+        padding: 0 16px;
     }
 
-    .sidebar-logo span,
-    .side-link span {
+    .profile-name {
         display: none;
     }
 
-    .sidebar-logo {
-        justify-content: center;
+    .profile-trigger {
+        padding: 5px;
+        border-radius: 50%;
     }
 
-    .side-link {
-        justify-content: center;
+    .profile-chevron {
+        display: none;
     }
 
+    /* Stats stack single col */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Dashboard sections */
     .dashboard-main,
     .analysis-main,
     .result-main,
     .advisory-main {
-        margin-left: 70px;
-
-        width: calc(100% - 70px);
-
-        padding: 25px;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: calc(58px + 20px);
     }
 
-    .auth-container {
+    .dashboard-top-action {
+        justify-content: stretch;
+    }
+
+    .dashboard-top-action .primary-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .quality-chart {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Analysis layout */
+    .analysis-layout {
         grid-template-columns: 1fr;
-    }
-
-    .auth-right {
-        display: none;
-    }
-
-    .auth-left {
-        padding: 90px 25px 40px;
     }
 
     .sample-options {
         grid-template-columns: 1fr;
     }
 
+    /* Result */
     .result-grid {
         grid-template-columns: 1fr;
     }
 
+    .result-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .result-actions {
+        flex-direction: column;
+        justify-content: stretch;
+    }
+
+    /* History */
     .table-header {
         display: none;
     }
 
     .table-row {
-        grid-template-columns: repeat(2, 1fr);
-
-        gap: 12px;
-    }
-
-    .table-row>* {
-        margin-bottom: 5px;
-    }
-}
-
-@media (max-width: 600px) {
-
-    .navbar {
-        padding: 0 20px;
-    }
-
-    .nav-links a:not(.nav-login) {
-        display: none;
-    }
-
-    .hero {
-        padding: 60px 20px;
-    }
-
-    .hero h1 {
-        font-size: 42px;
-    }
-
-    .hero-stats {
-        gap: 20px;
-    }
-
-    .analysis-card {
-        width: 100%;
-    }
-
-    .features-section,
-    .how-section {
-        padding: 60px 20px;
-    }
-
-    .features-grid,
-    .steps {
-        grid-template-columns: 1fr;
-    }
-
-    footer {
-        flex-direction: column;
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .dashboard-header {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .quality-chart {
-        flex-direction: column;
-    }
-
-    .sample-option {
-        flex-direction: column;
-    }
-
-    .result-card {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .result-actions {
-        justify-content: stretch;
-        flex-direction: column;
     }
 
     .history-toolbar {
         flex-direction: column;
+        gap: 10px;
     }
 
     .search-box {
         width: 100%;
+    }
+
+    /* Sample option card */
+    .sample-option {
+        flex-direction: column;
+    }
+
+    /* Footer */
+    .lp-footer {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+        padding: 18px;
+    }
+
+    /* Landing hero on phones */
+    .lp-hero {
+        padding-bottom: 60px;
+    }
+
+    .lp-hero-content h1 {
+        font-size: 36px;
+    }
+
+    .lp-hero-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .lp-cta-primary,
+    .lp-cta-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Auth pages on phone — stack vertically */
+    .af-auth-page {
+        grid-template-columns: 1fr;
+    }
+
+    .af-auth-left {
+        min-height: 230px;
+    }
+
+    .af-auth-left-tagline h2 {
+        font-size: 26px;
+    }
+
+    .af-auth-left-tagline p {
+        display: none;
+    }
+
+    .af-auth-right {
+        padding: 30px 20px;
+    }
+
+    /* Features / steps 1 col */
+    .lp-features-grid,
+    .lp-steps {
+        grid-template-columns: 1fr;
+    }
+
+    /* Navbar */
+    .lp-nav-links {
+        display: none;
+    }
+
+    .lp-navbar {
+        padding: 0 20px;
+    }
+
+    .profile-dropdown {
+        right: 12px;
+        width: calc(100vw - 24px);
     }
 }
