@@ -1,67 +1,58 @@
-# Barely Functional
+# AgriFeed AI - Intelligent Cattle Feed & Silage Quality Assessment
 
-Barely Functional is a React frontend for AI-assisted feed and silage quality analysis. It provides a farmer-focused interface for selecting samples, reviewing analysis results, viewing recommendations, and managing reports and profile settings.
+AgriFeed AI is an AI-powered agricultural quality analysis platform designed to help dairy farmers, feed mills, and livestock managers assess cattle feed and silage quality instantly using computer vision (Roboflow Google Gemini 3.1 Pro Workflow) and chemical parameter analysis.
 
-## Tech Stack
+---
 
-- React 18
-- Vite
-- React Router
-- Lucide React icons
+## 🚀 Key Features
 
-The current frontend uses mock data and does not require a backend service to run.
+- **AI Visual Defect Detection**: Detects mould patches, discoloration, and foreign objects with labeled bounding boxes.
+- **Physical & Chemical Parameter Evaluation**: Assesses Moisture, Crude Protein, Crude Fiber, Aflatoxin (ppb), pH, and Pit Temperature against scientific thresholds.
+- **Actionable Farmer Advisory**: Generates specific, practical recommendations for storage, fermentation management, and animal safety.
+- **Automated PDF Test Reports**: Download comprehensive assessment reports with color-coded charts and high-resolution annotated sample images.
+- **Responsive Web Dashboard**: Works seamlessly across desktops, tablets, and mobile devices.
 
-## Requirements
+---
 
-- Node.js 18 or newer
-- npm
+## 🛠️ Project Structure
 
-## Run the Frontend
+```
+Barely-Functional/
+├── Backend/                 # Express.js REST API & AI Analysis Service
+│   ├── src/
+│   │   ├── controllers/     # AI, Analysis, Auth, Dashboard, Report controllers
+│   │   ├── routes/          # API route definitions
+│   │   ├── services/        # Roboflow Gemini workflow client & report generators
+│   │   └── repositories/    # In-memory & DB data stores
+│   ├── uploads/             # Sample image store
+│   └── package.json
+└── Frontend/                # React (Vite) Application
+    ├── src/
+    │   ├── components/      # UI components, layout, cards, navigation
+    │   ├── context/         # Auth and session context
+    │   ├── pages/           # Feed/Silage Analysis, Reports, Dashboard, Auth
+    │   └── services/        # Axios API client
+    └── package.json
+```
 
-From the project folder:
+---
+
+## ⚡ Quick Start
+
+### 1. Backend Setup
 
 ```bash
+cd Backend
+npm install
+npm run dev # or node src/server.js
+```
+The backend will start at `http://localhost:5000`.
+
+### 2. Frontend Setup
+
+```bash
+cd Frontend
 npm install
 npm run dev
 ```
-
-Vite will print a local URL in the terminal. Open the default URL below if it is available:
-
-```text
-http://localhost:5173
-```
-
-To stop the development server, press `Ctrl+C` in the terminal.
-
-## Check the Frontend
-
-Start at `/` and verify the following flows in the browser:
-
-- Landing page: `/`
-- Registration and login: `/register`, `/login`
-- Dashboard: `/dashboard`
-- Sample selection: `/sample-selection`
-- Feed and silage analysis: `/feed-analysis`, `/silage-analysis`
-- Results and advisory: `/result`, `/advisory`
-- History and report: `/history`, `/report`
-- Profile and settings: `/profile`, `/settings`
-
-The pages are connected through the navigation and use local mock content, so no API keys or database setup are needed for this frontend check.
-
-## Production Build
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-Preview the production build locally:
-
-```bash
-npm run preview
-```
-
-## Repository
-
-GitHub: https://github.com/Omkar-G-20/Barely-Functional
+The frontend will start at `http://localhost:5173`.
