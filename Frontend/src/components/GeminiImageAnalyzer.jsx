@@ -46,68 +46,65 @@ function GeminiImageAnalyzer({
       : [];
   }, [analysis]);
 
-  function selectImage(event) {
-    const selectedImage = event.target.files?.[0];
+import { compressImage } from "../utils/imageCompressor";
 
-    setError("");
-    setAnalysis(null);
+    async function selectImage(event) {
+      const selectedImage = event.target.files?.[0];
 
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-
-    if (!selectedImage) {
-      setImageFile(null);
-      setPreviewUrl(null);
-      return;
-    }
-
-    const acceptedTypes = [
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-    ];
-
-    if (!acceptedTypes.includes(selectedImage.type)) {
-      setImageFile(null);
-      setPreviewUrl(null);
-      setError(
-        "Please choose a JPEG, PNG, or WebP image."
-      );
-      return;
-    }
-
-    if (selectedImage.size > 15 * 1024 * 1024) {
-      setImageFile(null);
-      setPreviewUrl(null);
-      setError(
-        "Please choose an image smaller than 15 MB."
-      );
-      return;
-    }
-
-    setImageFile(selectedImage);
-    setPreviewUrl(
-      URL.createObjectURL(selectedImage)
-    );
-  }
-
-  async function runAnalysis() {
-    if (!imageFile) {
-      setError("Please select an image first.");
-      return;
-    }
-
-    try {
-      setIsAnalyzing(true);
       setError("");
       setAnalysis(null);
 
-      const result = await analyzeImageWithGemini(
-        imageFile,
-        token
-      );
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      if (!selectedImage) {
+        setImageFile(null);
+        setPreviewUrl(null);
+        return;
+      }
+
+      const acceptedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+      ];
+
+      if (!acceptedTypes.includes(selectedImage.type)) {
+        setImageFile(null);
+        setPreviewUrl(null);
+        setError(
+          "Please choose a JPEG, PNG, or WebP image."
+        );
+        return;
+      }
+
+      setPreviewUrl(URL.createObjectURL(selectedImage));
+      const processed = await compressImage(selectedImage);
+      setImageFile(processed);
+    }
+
+    async function runAnalysis() {
+      if (!imageFile) {
+        setError("Please select an image first.");
+        return;
+      }
+
+      try {
+        setIsAnalyzing(true);
+        setError("");
+        setAnalysis(null);
+
+        let finalImage = imageFile;
+        if (finalImage.size > 2 * 1024 * 1024) {
+          finalImage = await compressImage(finalImage);
+        }
+
+        const result = await analyzeImageWithGemini(
+          finalImage,
+          token
+        );
 
       setAnalysis(result);
 

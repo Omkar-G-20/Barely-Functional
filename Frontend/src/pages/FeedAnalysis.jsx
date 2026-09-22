@@ -15,6 +15,8 @@ import Sidebar from "../components/Sidebar";
 import AppHeader from "../components/AppHeader";
 import { api } from "../services/api";
 
+import { compressImage } from "../utils/imageCompressor";
+
 function FeedAnalysis() {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
@@ -33,13 +35,14 @@ function FeedAnalysis() {
         ph: ""
     });
 
-    const handleImage = (e) => {
+    const handleImage = async (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            setImageFile(file);
             setImagePreview(URL.createObjectURL(file));
             setShowImageError(false);
             setApiError("");
+            const processed = await compressImage(file);
+            setImageFile(processed);
         }
     };
 
@@ -54,10 +57,15 @@ function FeedAnalysis() {
         setApiError("");
 
         try {
+            let finalImage = imageFile;
+            if (finalImage && finalImage.size > 2 * 1024 * 1024) {
+                finalImage = await compressImage(finalImage);
+            }
+
             const formData = new FormData();
             formData.append("sampleType", "feed");
-            if (imageFile) {
-                formData.append("image", imageFile);
+            if (finalImage) {
+                formData.append("image", finalImage);
             }
             if (data.moisture) formData.append("moisture", data.moisture);
             if (data.protein) formData.append("protein", data.protein);
