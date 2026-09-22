@@ -4,22 +4,36 @@ const fs = require("fs");
 const path = require("path");
 
 async function initPostgres() {
-  const host = process.env.DB_HOST || "localhost";
-  const port = Number(process.env.DB_PORT || 5432);
-  const database = process.env.DB_NAME || "agrifeed_db";
-  const user = process.env.DB_USER || "postgres";
-  const password = process.env.DB_PASSWORD || "";
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  let pool;
 
-  console.log(`Connecting to PostgreSQL at ${host}:${port}/${database} (User: ${user})...`);
+  if (connectionString) {
+    console.log("Connecting to PostgreSQL using connection string...");
+    const isSsl = connectionString.includes("sslmode=") || !connectionString.includes("localhost");
+    pool = new Pool({
+      connectionString,
+      ssl: isSsl ? { rejectUnauthorized: false } : false,
+      connectionTimeoutMillis: 7000,
+    });
+  } else {
+    const host = process.env.DB_HOST || "localhost";
+    const port = Number(process.env.DB_PORT || 5432);
+    const database = process.env.DB_NAME || "AgriFeed";
+    const user = process.env.DB_USER || "postgres";
+    const password = process.env.DB_PASSWORD || "";
+    const isRemote = host && !["localhost", "127.0.0.1"].includes(host);
 
-  const pool = new Pool({
-    host,
-    port,
-    database,
-    user,
-    password,
-    connectionTimeoutMillis: 5000,
-  });
+    console.log(`Connecting to PostgreSQL at ${host}:${port}/${database} (User: ${user})...`);
+    pool = new Pool({
+      host,
+      port,
+      database,
+      user,
+      password,
+      ssl: isRemote ? { rejectUnauthorized: false } : false,
+      connectionTimeoutMillis: 7000,
+    });
+  }
 
   try {
     const res = await pool.query("SELECT NOW() AS current_time");
