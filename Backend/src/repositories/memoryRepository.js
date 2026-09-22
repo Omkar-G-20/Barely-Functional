@@ -62,172 +62,146 @@ function mapAnalysis(row) {
   };
 }
 
+let dbInitPromise = null;
+
 async function ensureSeedData() {
-  const pool = getPool();
-  if (pool) {
-    try {
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS users (
-          id SERIAL PRIMARY KEY,
-          name VARCHAR(255) NOT NULL,
-          email VARCHAR(255) UNIQUE,
-          phone VARCHAR(50),
-          password_hash TEXT NOT NULL,
-          farm_information TEXT,
-          language VARCHAR(50) DEFAULT 'English',
-          notifications BOOLEAN DEFAULT true,
-          offline_mode BOOLEAN DEFAULT false,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
+  if (dbInitPromise) return dbInitPromise;
 
-        CREATE TABLE IF NOT EXISTS analyses (
-          id SERIAL PRIMARY KEY,
-          user_id INT NOT NULL,
-          test_id VARCHAR(50) NOT NULL,
-          sample_type VARCHAR(50) NOT NULL,
-          image_path TEXT,
-          annotated_image_path TEXT,
-          output_image_data_url TEXT,
-          ai_analysis JSONB,
-          moisture NUMERIC,
-          protein NUMERIC,
-          fiber NUMERIC,
-          aflatoxin NUMERIC,
-          ph NUMERIC,
-          temperature NUMERIC,
-          ai_result TEXT,
-          confidence NUMERIC,
-          quality VARCHAR(50),
-          recommendations JSONB,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-      `);
+  dbInitPromise = (async () => {
+    // Populate In-Memory default user if empty
+    if (memoryUsers.length === 0) {
+      const demoPasswordHash = await bcrypt.hash("password123", 10);
+      const demoUser = {
+        id: "usr_1",
+        name: "Farmer",
+        email: "farmer@example.com",
+        phone: "+91 98765 43210",
+        passwordHash: demoPasswordHash,
+        farmInformation: "Green Valley Dairy Farm, Maharashtra, India. Herd of 45 Holstein Friesian cows.",
+        settings: {
+          language: "English",
+          notifications: true,
+          offlineMode: false,
+        },
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      };
+      memoryUsers.push(demoUser);
 
-      // Ensure any missing columns in existing tables are safely added
-      try {
-        await pool.query(`ALTER TABLE users ALTER COLUMN email DROP NOT NULL;`);
-        await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS annotated_image_path TEXT;`);
-        await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS output_image_data_url TEXT;`);
-        await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS ai_analysis JSONB;`);
-        await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS aflatoxin NUMERIC;`);
-      } catch (alterErr) {
-        // Ignored if already existing
-      }
-    } catch (err) {
-      console.warn("Could not ensure PG tables:", err.message);
+      const sampleFeed = {
+        id: "an_1",
+        userId: "usr_1",
+        testId: "FD-001",
+        sampleType: "feed",
+        imagePath: null,
+        measurements: { moisture: 12.5, protein: 18.2, fiber: 14.8, aflatoxin: 4.5, ph: 6.8 },
+        aiResult: "Good Quality Feed",
+        confidence: 94,
+        quality: "GOOD",
+        recommendations: [
+          "Store feed in a clean, dry, well-ventilated storage facility.",
+          "Aflatoxin level is well within safe thresholds (< 20 ppb).",
+          "Perform regular batch inspections before feeding."
+        ],
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      };
+
+      const sampleSilage = {
+        id: "an_2",
+        userId: "usr_1",
+        testId: "SL-002",
+        sampleType: "silage",
+        imagePath: null,
+        measurements: { moisture: 64.0, protein: 12.0, fiber: 22.5, aflatoxin: 2.1, ph: 4.2, temperature: 24.5 },
+        aiResult: "Good Quality Silage",
+        confidence: 88,
+        quality: "GOOD",
+        recommendations: [
+          "pH is optimal (4.2), indicating excellent lactic fermentation.",
+          "Keep the silage face tightly sealed after daily extraction.",
+          "Regularly monitor pit moisture and temperature."
+        ],
+        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      };
+
+      memoryAnalyses.push(sampleFeed, sampleSilage);
     }
-    return;
-  }
 
-  // Populate In-Memory default user if empty
-  if (memoryUsers.length === 0) {
-    const demoPasswordHash = await bcrypt.hash("password123", 10);
-    const demoUser = {
-      id: "usr_1",
-      name: "Farmer",
-      email: "farmer@example.com",
-      phone: "+91 98765 43210",
-      passwordHash: demoPasswordHash,
-      farmInformation: "Green Valley Dairy Farm, Maharashtra, India. Herd of 45 Holstein Friesian cows.",
-      settings: {
-        language: "English",
-        notifications: true,
-        offlineMode: false,
-      },
-      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    };
-    memoryUsers.push(demoUser);
+    const pool = getPool();
+    if (pool) {
+      try {
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) UNIQUE,
+            phone VARCHAR(50),
+            password_hash TEXT NOT NULL,
+            farm_information TEXT,
+            language VARCHAR(50) DEFAULT 'English',
+            notifications BOOLEAN DEFAULT true,
+            offline_mode BOOLEAN DEFAULT false,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
 
-    // Initial analyses with all 5 parameters: moisture, protein, fiber, aflatoxin, pH
-    const sampleFeed = {
-      id: "an_1",
-      userId: "usr_1",
-      testId: "FD-001",
-      sampleType: "feed",
-      imagePath: null,
-      measurements: { moisture: 12.5, protein: 18.2, fiber: 14.8, aflatoxin: 4.5, ph: 6.8 },
-      aiResult: "Good Quality Feed",
-      confidence: 94,
-      quality: "GOOD",
-      recommendations: [
-        "Store feed in a clean, dry, well-ventilated storage facility.",
-        "Aflatoxin level is well within safe thresholds (< 20 ppb).",
-        "Perform regular batch inspections before feeding."
-      ],
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    };
+          CREATE TABLE IF NOT EXISTS analyses (
+            id SERIAL PRIMARY KEY,
+            user_id INT NOT NULL,
+            test_id VARCHAR(50) NOT NULL,
+            sample_type VARCHAR(50) NOT NULL,
+            image_path TEXT,
+            annotated_image_path TEXT,
+            output_image_data_url TEXT,
+            ai_analysis JSONB,
+            moisture NUMERIC,
+            protein NUMERIC,
+            fiber NUMERIC,
+            aflatoxin NUMERIC,
+            ph NUMERIC,
+            temperature NUMERIC,
+            ai_result TEXT,
+            confidence NUMERIC,
+            quality VARCHAR(50),
+            recommendations JSONB,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `);
 
-    const sampleSilage = {
-      id: "an_2",
-      userId: "usr_1",
-      testId: "SL-002",
-      sampleType: "silage",
-      imagePath: null,
-      measurements: { moisture: 64.0, protein: 12.0, fiber: 22.5, aflatoxin: 2.1, ph: 4.2, temperature: 24.5 },
-      aiResult: "Good Quality Silage",
-      confidence: 88,
-      quality: "GOOD",
-      recommendations: [
-        "pH is optimal (4.2), indicating excellent lactic fermentation.",
-        "Keep the silage face tightly sealed after daily extraction.",
-        "Regularly monitor pit moisture and temperature."
-      ],
-      createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    };
+        try {
+          await pool.query(`ALTER TABLE users ALTER COLUMN email DROP NOT NULL;`);
+          await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS annotated_image_path TEXT;`);
+          await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS output_image_data_url TEXT;`);
+          await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS ai_analysis JSONB;`);
+          await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS aflatoxin NUMERIC;`);
+        } catch (alterErr) {
+          // Ignored
+        }
+      } catch (err) {
+        console.warn("Could not ensure PG tables:", err.message);
+      }
+    }
+  })();
 
-    const samplePoorFeed = {
-      id: "an_3",
-      userId: "usr_1",
-      testId: "FD-003",
-      sampleType: "feed",
-      imagePath: null,
-      measurements: { moisture: 21.0, protein: 11.5, fiber: 28.0, aflatoxin: 28.5, ph: 5.4 },
-      aiResult: "Poor Quality Feed",
-      confidence: 62,
-      quality: "POOR",
-      recommendations: [
-        "CRITICAL WARNING: Aflatoxin level exceeds safe threshold (> 20 ppb). High risk of mycotoxin poisoning.",
-        "Moisture is high (>20%); dry feed thoroughly to prevent mould formation.",
-        "Do not feed to lactating cows or calves without certified toxin testing."
-      ],
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    };
-
-    const sampleAverageSilage = {
-      id: "an_4",
-      userId: "usr_1",
-      testId: "SL-004",
-      sampleType: "silage",
-      imagePath: null,
-      measurements: { moisture: 72.0, protein: 9.8, fiber: 31.0, aflatoxin: 8.0, ph: 4.9, temperature: 32.0 },
-      aiResult: "Average Quality Silage",
-      confidence: 76,
-      quality: "AVERAGE",
-      recommendations: [
-        "Silage pH is slightly high (4.9); fermentation was moderately compromised.",
-        "Slightly elevated temperature (32°C); ensure bunker face is fed out rapidly.",
-        "Inspect pit plastic covering for air leakage."
-      ],
-      createdAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
-    };
-
-    memoryAnalyses.push(sampleFeed, sampleSilage, samplePoorFeed, sampleAverageSilage);
-  }
+  return dbInitPromise;
 }
 
 async function findUserByEmail(email) {
   if (!email) return null;
+  await ensureSeedData();
   const pool = getPool();
   if (pool) {
-    const result = await pool.query(
-      `SELECT id, name, email, phone, password_hash, farm_information,
-              language, notifications, offline_mode, created_at
-       FROM users
-       WHERE LOWER(email) = LOWER($1)
-       LIMIT 1`,
-      [email.trim()]
-    );
-    return mapUser(result.rows[0]);
+    try {
+      const result = await pool.query(
+        `SELECT id, name, email, phone, password_hash, farm_information,
+                language, notifications, offline_mode, created_at
+         FROM users
+         WHERE LOWER(email) = LOWER($1)
+         LIMIT 1`,
+        [email.trim()]
+      );
+      return mapUser(result.rows[0]);
+    } catch (err) {
+      console.warn("PG findUserByEmail fallback:", err.message);
+    }
   }
 
   const user = memoryUsers.find((u) => u.email && u.email.toLowerCase() === email.trim().toLowerCase());
@@ -236,19 +210,24 @@ async function findUserByEmail(email) {
 
 async function findUserByPhone(phone) {
   if (!phone) return null;
+  await ensureSeedData();
   const cleanPhone = phone.trim();
   const stripped = cleanPhone.replace(/[\s\-+]/g, "");
   const pool = getPool();
   if (pool) {
-    const result = await pool.query(
-      `SELECT id, name, email, phone, password_hash, farm_information,
-              language, notifications, offline_mode, created_at
-       FROM users
-       WHERE phone = $1 OR regexp_replace(phone, '[\\s\\-+]', '', 'g') = $2
-       LIMIT 1`,
-      [cleanPhone, stripped]
-    );
-    return mapUser(result.rows[0]);
+    try {
+      const result = await pool.query(
+        `SELECT id, name, email, phone, password_hash, farm_information,
+                language, notifications, offline_mode, created_at
+         FROM users
+         WHERE phone = $1 OR regexp_replace(phone, '[\\s\\-+]', '', 'g') = $2
+         LIMIT 1`,
+        [cleanPhone, stripped]
+      );
+      return mapUser(result.rows[0]);
+    } catch (err) {
+      console.warn("PG findUserByPhone fallback:", err.message);
+    }
   }
 
   const user = memoryUsers.find((u) => {
@@ -262,22 +241,27 @@ async function findUserByPhone(phone) {
 
 async function findUserByIdentifier(identifier) {
   if (!identifier) return null;
+  await ensureSeedData();
   const clean = identifier.trim();
   const lower = clean.toLowerCase();
   const stripped = clean.replace(/[\s\-+]/g, "");
 
   const pool = getPool();
   if (pool) {
-    const result = await pool.query(
-      `SELECT id, name, email, phone, password_hash, farm_information,
-              language, notifications, offline_mode, created_at
-       FROM users
-       WHERE (email IS NOT NULL AND LOWER(email) = $1)
-          OR (phone IS NOT NULL AND (phone = $2 OR regexp_replace(phone, '[\\s\\-+]', '', 'g') = $3))
-       LIMIT 1`,
-      [lower, clean, stripped]
-    );
-    return mapUser(result.rows[0]);
+    try {
+      const result = await pool.query(
+        `SELECT id, name, email, phone, password_hash, farm_information,
+                language, notifications, offline_mode, created_at
+         FROM users
+         WHERE (email IS NOT NULL AND LOWER(email) = $1)
+            OR (phone IS NOT NULL AND (phone = $2 OR regexp_replace(phone, '[\\s\\-+]', '', 'g') = $3))
+         LIMIT 1`,
+        [lower, clean, stripped]
+      );
+      return mapUser(result.rows[0]);
+    } catch (err) {
+      console.warn("PG findUserByIdentifier fallback:", err.message);
+    }
   }
 
   const user = memoryUsers.find((u) => {
@@ -292,17 +276,22 @@ async function findUserByIdentifier(identifier) {
 }
 
 async function findUserById(userId) {
+  await ensureSeedData();
   const pool = getPool();
   if (pool) {
-    const result = await pool.query(
-      `SELECT id, name, email, phone, password_hash, farm_information,
-              language, notifications, offline_mode, created_at
-       FROM users
-       WHERE id = $1
-       LIMIT 1`,
-      [userId]
-    );
-    return mapUser(result.rows[0]);
+    try {
+      const result = await pool.query(
+        `SELECT id, name, email, phone, password_hash, farm_information,
+                language, notifications, offline_mode, created_at
+         FROM users
+         WHERE id::text = $1
+         LIMIT 1`,
+        [String(userId)]
+      );
+      return mapUser(result.rows[0]);
+    } catch (err) {
+      console.warn("PG findUserById fallback:", err.message);
+    }
   }
 
   const user = memoryUsers.find((u) => String(u.id) === String(userId));
@@ -310,17 +299,22 @@ async function findUserById(userId) {
 }
 
 async function createUser(data) {
+  await ensureSeedData();
   const emailVal = data.email ? data.email.trim().toLowerCase() : null;
   const pool = getPool();
   if (pool) {
-    const result = await pool.query(
-      `INSERT INTO users (name, email, phone, password_hash)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, name, email, phone, password_hash, farm_information,
-                 language, notifications, offline_mode, created_at`,
-      [data.name, emailVal, data.phone || "", data.passwordHash]
-    );
-    return mapUser(result.rows[0]);
+    try {
+      const result = await pool.query(
+        `INSERT INTO users (name, email, phone, password_hash)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, name, email, phone, password_hash, farm_information,
+                   language, notifications, offline_mode, created_at`,
+        [data.name, emailVal, data.phone || "", data.passwordHash]
+      );
+      return mapUser(result.rows[0]);
+    } catch (err) {
+      console.warn("PG createUser fallback to memory:", err.message);
+    }
   }
 
   const newUser = {

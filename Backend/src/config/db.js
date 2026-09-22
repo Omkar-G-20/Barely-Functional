@@ -48,7 +48,7 @@ async function testConnection() {
 }
 
 function getPool() {
-  return isConnected ? pool : null;
+  return pool;
 }
 
 module.exports = { pool, testConnection, getPool };
