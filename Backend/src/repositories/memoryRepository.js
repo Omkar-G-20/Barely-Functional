@@ -495,34 +495,39 @@ async function getAnalysesByUser(userId) {
 }
 
 async function getDashboardStats(userId) {
+  await ensureSeedData();
   const pool = getPool();
   if (pool) {
-    const result = await pool.query(
-      `SELECT
-         COUNT(*)::int AS total_tests,
-         COUNT(*) FILTER (WHERE quality = 'GOOD')::int AS good_quality,
-         COUNT(*) FILTER (WHERE quality = 'AVERAGE')::int AS average_quality,
-         COUNT(*) FILTER (WHERE quality = 'POOR')::int AS poor_quality
-       FROM analyses
-       WHERE user_id::text = $1`,
-      [String(userId)]
-    );
+    try {
+      const result = await pool.query(
+        `SELECT
+           COUNT(*)::int AS total_tests,
+           COUNT(*) FILTER (WHERE UPPER(quality) = 'GOOD')::int AS good_quality,
+           COUNT(*) FILTER (WHERE UPPER(quality) = 'AVERAGE')::int AS average_quality,
+           COUNT(*) FILTER (WHERE UPPER(quality) = 'POOR')::int AS poor_quality
+         FROM analyses
+         WHERE user_id::text = $1`,
+        [String(userId)]
+      );
 
-    const row = result.rows[0] || {};
-    return {
-      totalTests: Number(row.total_tests || 0),
-      goodQuality: Number(row.good_quality || 0),
-      averageQuality: Number(row.average_quality || 0),
-      poorQuality: Number(row.poor_quality || 0),
-    };
+      const row = result.rows[0] || {};
+      return {
+        totalTests: Number(row.total_tests || 0),
+        goodQuality: Number(row.good_quality || 0),
+        averageQuality: Number(row.average_quality || 0),
+        poorQuality: Number(row.poor_quality || 0),
+      };
+    } catch (err) {
+      console.warn("PG getDashboardStats fallback:", err.message);
+    }
   }
 
   const userAnalyses = memoryAnalyses.filter((a) => String(a.userId) === String(userId));
   return {
     totalTests: userAnalyses.length,
-    goodQuality: userAnalyses.filter((a) => a.quality === "GOOD").length,
-    averageQuality: userAnalyses.filter((a) => a.quality === "AVERAGE").length,
-    poorQuality: userAnalyses.filter((a) => a.quality === "POOR").length,
+    goodQuality: userAnalyses.filter((a) => (a.quality || "").toUpperCase() === "GOOD").length,
+    averageQuality: userAnalyses.filter((a) => (a.quality || "").toUpperCase() === "AVERAGE").length,
+    poorQuality: userAnalyses.filter((a) => (a.quality || "").toUpperCase() === "POOR").length,
   };
 }
 

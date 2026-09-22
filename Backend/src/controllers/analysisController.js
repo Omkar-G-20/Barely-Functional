@@ -83,11 +83,11 @@ async function createSampleAnalysis(req, res) {
     // If AI found mould, foreign material or severe discoloration, reflect in quality and status
     if (aiAnalysis && aiAnalysis.visualStatus) {
       if (aiAnalysis.visualStatus.code === "poor") {
-        result.quality = "Poor";
+        result.quality = "POOR";
         result.aiResult = `Visual Defects Detected (Poor Condition)`;
         result.confidence = 94;
       } else if (aiAnalysis.visualStatus.code === "average") {
-        if (result.quality === "Good") result.quality = "Average";
+        if (result.quality === "GOOD") result.quality = "AVERAGE";
         result.aiResult = `Abnormal Discoloration Detected (Average)`;
         result.confidence = 88;
       } else {
