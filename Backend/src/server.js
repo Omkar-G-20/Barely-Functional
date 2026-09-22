@@ -32,7 +32,7 @@ app.use(
   express.static(path.resolve(process.env.UPLOAD_DIR || "uploads"))
 );
 
-app.get("/api/health", (req, res) => {
+app.get(["/api/health", "/health"], (req, res) => {
   res.json({
     success: true,
     message: "AgriSense AI backend is running",
@@ -40,13 +40,27 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Mount on both /api/xxx and /xxx for direct and rewritten serverless invocations
 app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes);
+
 app.use("/api/analysis", analysisRoutes);
+app.use("/analysis", analysisRoutes);
+
 app.use("/api/ai", aiRoutes);
+app.use("/ai", aiRoutes);
+
 app.use("/api/profile", profileRoutes);
+app.use("/profile", profileRoutes);
+
 app.use("/api/settings", settingsRoutes);
+app.use("/settings", settingsRoutes);
+
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/dashboard", dashboardRoutes);
+
 app.use("/api/reports", reportRoutes);
+app.use("/reports", reportRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({
