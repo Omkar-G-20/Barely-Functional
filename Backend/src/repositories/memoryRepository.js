@@ -86,6 +86,9 @@ async function ensureSeedData() {
           test_id VARCHAR(50) NOT NULL,
           sample_type VARCHAR(50) NOT NULL,
           image_path TEXT,
+          annotated_image_path TEXT,
+          output_image_data_url TEXT,
+          ai_analysis JSONB,
           moisture NUMERIC,
           protein NUMERIC,
           fiber NUMERIC,
@@ -100,11 +103,15 @@ async function ensureSeedData() {
         );
       `);
 
-      // Ensure email can be nullable in existing tables
+      // Ensure any missing columns in existing tables are safely added
       try {
         await pool.query(`ALTER TABLE users ALTER COLUMN email DROP NOT NULL;`);
+        await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS annotated_image_path TEXT;`);
+        await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS output_image_data_url TEXT;`);
+        await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS ai_analysis JSONB;`);
+        await pool.query(`ALTER TABLE analyses ADD COLUMN IF NOT EXISTS aflatoxin NUMERIC;`);
       } catch (alterErr) {
-        // Ignored if already dropped or unsupported
+        // Ignored if already existing
       }
     } catch (err) {
       console.warn("Could not ensure PG tables:", err.message);
@@ -400,16 +407,20 @@ async function createAnalysis(data) {
   if (pool) {
     const result = await pool.query(
       `INSERT INTO analyses
-         (user_id, test_id, sample_type, image_path, moisture, protein, fiber,
+         (user_id, test_id, sample_type, image_path, annotated_image_path,
+          output_image_data_url, ai_analysis, moisture, protein, fiber,
           aflatoxin, ph, temperature, ai_result, confidence, quality, recommendations)
        VALUES
-         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb)
+         ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17::jsonb)
        RETURNING *`,
       [
         data.userId,
         `AG-${Date.now().toString().slice(-6)}`,
         data.sampleType,
         data.imagePath || null,
+        data.annotatedImagePath || null,
+        data.outputImageDataUrl || null,
+        JSON.stringify(data.aiAnalysis || null),
         m.moisture ?? null,
         m.protein ?? null,
         m.fiber ?? null,

@@ -114,4 +114,10 @@ async function startServer() {
   }
 }
 
-startServer();
+if (require.main === module) {
+  startServer();
+} else {
+  ensureSeedData().catch((err) => console.warn("Seed data init warning:", err.message));
+}
+
+module.exports = app;
