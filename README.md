@@ -39,20 +39,4 @@ Barely-Functional/
 
 ## ⚡ Quick Start
 
-### 1. Backend Setup
-
-```bash
-cd Backend
-npm install
-npm run dev # or node src/server.js
-```
-The backend will start at `http://localhost:5000`.
-
-### 2. Frontend Setup
-
-```bash
-cd Frontend
-npm install
-npm run dev
-```
-The frontend will start at `http://localhost:5173`.
+https://barely-functional-pi.vercel.app/
