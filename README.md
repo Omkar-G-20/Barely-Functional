@@ -11,6 +11,8 @@ AgriFeed AI is an AI-powered agricultural quality analysis platform designed to 
 - **Actionable Farmer Advisory**: Generates specific, practical recommendations for storage, fermentation management, and animal safety.
 - **Automated PDF Test Reports**: Download comprehensive assessment reports with color-coded charts and high-resolution annotated sample images.
 - **Responsive Web Dashboard**: Works seamlessly across desktops, tablets, and mobile devices.
+- **Multilingual Accessibility**: Different language modes are added for better understanding.
+- **Access to the camera**: Direct pictures can be taken from the camera for the analysis.
 
 ---
 
