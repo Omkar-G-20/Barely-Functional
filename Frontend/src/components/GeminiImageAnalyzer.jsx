@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useAuth } from "../context/AuthContext";
 import { analyzeImageWithGemini } from "../services/api";
+import { compressImage } from "../utils/imageCompressor";
+import CameraCapture from "./CameraCapture";
 
 import "../styles/gemini-analysis.css";
 
@@ -19,6 +21,60 @@ function roundValue(value) {
     : "—";
 }
 
+/**
+ * Client-side sanity check for silage / feed images.
+ * Returns null if valid, or an error string if the image
+ * is unsuitable (wrong type, blank, too large, wrong shape).
+ */
+async function validateFeedImage(file) {
+  const accepted = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+  ];
+
+  if (!accepted.includes(file.type)) {
+    return "Invalid photo: please use a JPEG, PNG, or WebP image.";
+  }
+
+  if (file.size < 10 * 1024) {
+    return "Invalid photo: the file is too small or blank.";
+  }
+
+  if (file.size > 50 * 1024 * 1024) {
+    return "Invalid photo: the file exceeds 50 MB. Please use a smaller image.";
+  }
+
+  // Reject screenshots / scanned documents via aspect ratio
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const ratio = img.naturalWidth / img.naturalHeight;
+
+      if (ratio < 0.25 || ratio > 4.0) {
+        resolve(
+          "Invalid photo: this looks like a screenshot or document rather than a feed / silage photo. Please take or upload a proper image."
+        );
+      } else {
+        resolve(null);
+      }
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(
+        "Invalid photo: the file could not be read as an image."
+      );
+    };
+
+    img.src = url;
+  });
+}
+
 function GeminiImageAnalyzer({
   sampleType = "feed",
   onAnalysisComplete,
@@ -28,9 +84,12 @@ function GeminiImageAnalyzer({
   const [imageFile, setImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [analysis, setAnalysis] = useState(null);
-  const [isAnalyzing, setIsAnalyzing] =
-    useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState("");
+  const [showCamera, setShowCamera] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -46,65 +105,66 @@ function GeminiImageAnalyzer({
       : [];
   }, [analysis]);
 
-import { compressImage } from "../utils/imageCompressor";
+  async function processFile(selectedImage) {
+    setError("");
+    setAnalysis(null);
 
-    async function selectImage(event) {
-      const selectedImage = event.target.files?.[0];
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
 
+    if (!selectedImage) {
+      setImageFile(null);
+      setPreviewUrl(null);
+      return;
+    }
+
+    setIsValidating(true);
+    const validationError = await validateFeedImage(selectedImage);
+    setIsValidating(false);
+
+    if (validationError) {
+      setImageFile(null);
+      setPreviewUrl(null);
+      setError(validationError);
+      return;
+    }
+
+    setPreviewUrl(URL.createObjectURL(selectedImage));
+    const processed = await compressImage(selectedImage);
+    setImageFile(processed);
+  }
+
+  async function selectImage(event) {
+    const selectedImage = event.target.files?.[0];
+    await processFile(selectedImage ?? null);
+    event.target.value = "";
+  }
+
+  async function handleCameraCapture(file) {
+    await processFile(file);
+  }
+
+  async function runAnalysis() {
+    if (!imageFile) {
+      setError("Please select an image first.");
+      return;
+    }
+
+    try {
+      setIsAnalyzing(true);
       setError("");
       setAnalysis(null);
 
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+      let finalImage = imageFile;
+      if (finalImage.size > 2 * 1024 * 1024) {
+        finalImage = await compressImage(finalImage);
       }
 
-      if (!selectedImage) {
-        setImageFile(null);
-        setPreviewUrl(null);
-        return;
-      }
-
-      const acceptedTypes = [
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/webp",
-      ];
-
-      if (!acceptedTypes.includes(selectedImage.type)) {
-        setImageFile(null);
-        setPreviewUrl(null);
-        setError(
-          "Please choose a JPEG, PNG, or WebP image."
-        );
-        return;
-      }
-
-      setPreviewUrl(URL.createObjectURL(selectedImage));
-      const processed = await compressImage(selectedImage);
-      setImageFile(processed);
-    }
-
-    async function runAnalysis() {
-      if (!imageFile) {
-        setError("Please select an image first.");
-        return;
-      }
-
-      try {
-        setIsAnalyzing(true);
-        setError("");
-        setAnalysis(null);
-
-        let finalImage = imageFile;
-        if (finalImage.size > 2 * 1024 * 1024) {
-          finalImage = await compressImage(finalImage);
-        }
-
-        const result = await analyzeImageWithGemini(
-          finalImage,
-          token
-        );
+      const result = await analyzeImageWithGemini(
+        finalImage,
+        token
+      );
 
       setAnalysis(result);
 
@@ -132,16 +192,15 @@ import { compressImage } from "../utils/imageCompressor";
     setAnalysis(null);
     setError("");
 
-    const fileInput = document.getElementById(
-      `gemini-${sampleType}-image`
-    );
-
-    if (fileInput) {
-      fileInput.value = "";
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   }
 
+  const isBusy = isAnalyzing || isValidating;
+
   return (
+    <>
     <section className="gemini-analyzer">
       <header className="gemini-analyzer__header">
         <div>
@@ -166,24 +225,86 @@ import { compressImage } from "../utils/imageCompressor";
       </header>
 
       <div className="gemini-analyzer__upload">
-        <label
-          htmlFor={`gemini-${sampleType}-image`}
-        >
-          Select a {sampleType} image
+        <label>
+          Select or capture a {sampleType} image
         </label>
 
-        <input
-          id={`gemini-${sampleType}-image`}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={selectImage}
-          disabled={isAnalyzing}
-        />
+        <div className="gemini-analyzer__input-row">
+          {/* ── Standard file picker ── */}
+          <label
+            htmlFor={`gemini-${sampleType}-image`}
+            className="gemini-analyzer__file-btn"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            Upload image
+          </label>
+
+          <input
+            ref={fileInputRef}
+            id={`gemini-${sampleType}-image`}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={selectImage}
+            disabled={isBusy}
+            className="gemini-analyzer__hidden-input"
+          />
+
+          {/* ── Camera capture ── */}
+          <button
+            type="button"
+            className="gemini-analyzer__camera-btn"
+            onClick={() => setShowCamera(true)}
+            disabled={isBusy}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+            Use camera
+          </button>
+        </div>
 
         <p>
-          JPEG, PNG, or WebP. Maximum size: 15 MB.
+          JPEG, PNG, or WebP · Max 50 MB · Must be a{" "}
+          {sampleType} photo
         </p>
       </div>
+
+      {isValidating && (
+        <div className="gemini-analyzer__loading">
+          <div className="gemini-analyzer__spinner" />
+          <div>
+            <strong>Checking image</strong>
+            <p>Validating that the photo is suitable…</p>
+          </div>
+        </div>
+      )}
 
       {previewUrl && (
         <div className="gemini-analyzer__selected">
@@ -203,7 +324,7 @@ import { compressImage } from "../utils/imageCompressor";
           type="button"
           className="gemini-analyzer__primary"
           onClick={runAnalysis}
-          disabled={!imageFile || isAnalyzing}
+          disabled={!imageFile || isBusy}
         >
           {isAnalyzing
             ? "Analyzing with Gemini Pro..."
@@ -214,7 +335,7 @@ import { compressImage } from "../utils/imageCompressor";
           type="button"
           className="gemini-analyzer__secondary"
           onClick={reset}
-          disabled={isAnalyzing}
+          disabled={isBusy}
         >
           Reset
         </button>
@@ -438,6 +559,14 @@ import { compressImage } from "../utils/imageCompressor";
         fermentation chemistry, or laboratory safety.
       </aside>
     </section>
+
+    {showCamera && (
+      <CameraCapture
+        onCapture={handleCameraCapture}
+        onClose={() => setShowCamera(false)}
+      />
+    )}
+  </>
   );
 }
 

@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Camera, Brain, ClipboardCheck, BarChart3, Leaf } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 function LandingPage() {
+    const { t } = useLanguage();
+
     return (
         <div className="landing-page">
 
@@ -16,15 +19,15 @@ function LandingPage() {
                 </Link>
 
                 <div className="lp-nav-links">
-                    <a href="#features">Features</a>
-                    <a href="#how-it-works">How It Works</a>
-                    <a href="#about">About</a>
+                    <a href="#features">{t.features}</a>
+                    <a href="#how-it-works">{t.howItWorks}</a>
+                    <a href="#about">{t.about}</a>
                 </div>
 
                 <div className="lp-nav-actions">
-                    <Link to="/login" className="lp-login-btn">Login</Link>
+                    <Link to="/login" className="lp-login-btn">{t.login}</Link>
                     <Link to="/register" className="lp-started-btn">
-                        Get Started <ArrowRight size={15} />
+                        {t.getStarted} <ArrowRight size={15} />
                     </Link>
                 </div>
             </nav>
@@ -40,23 +43,19 @@ function LandingPage() {
                     </div>
 
                     <h1>
-                        Smarter Feed.<br />
-                        Healthier Cattle.<br />
-                        <span>Better Decisions.</span>
+                        {t.heroHeadline1}<br />
+                        {t.heroHeadline2}<br />
+                        <span>{t.heroHeadline3}</span>
                     </h1>
 
-                    <p>
-                        Analyze cattle feed and silage quality using AI-powered image
-                        analysis and test readings. Get simple and actionable
-                        recommendations for your farm.
-                    </p>
+                    <p>{t.heroDesc}</p>
 
                     <div className="lp-hero-buttons">
                         <Link to="/register" className="lp-cta-primary">
-                            Start Analyzing <ArrowRight size={17} />
+                            {t.startAnalyzing} <ArrowRight size={17} />
                         </Link>
                         <a href="#how-it-works" className="lp-cta-secondary">
-                            Learn More
+                            {t.learnMore}
                         </a>
                     </div>
                 </div>
@@ -65,31 +64,31 @@ function LandingPage() {
             {/* FEATURES */}
             <section className="lp-features" id="features">
                 <div className="lp-section-heading">
-                    <span>FEATURES</span>
-                    <h2>Everything you need for quality assessment</h2>
-                    <p>A simple digital platform designed to make feed and silage assessment easier.</p>
+                    <span>{t.featuresLabel}</span>
+                    <h2>{t.featuresHeading}</h2>
+                    <p>{t.featuresSubheading}</p>
                 </div>
 
                 <div className="lp-features-grid">
                     <div className="lp-feature-card">
                         <div className="lp-feature-icon"><Camera size={26} /></div>
-                        <h3>Image Analysis</h3>
-                        <p>Upload or capture sample images for AI-based visual analysis.</p>
+                        <h3>{t.imageAnalysis}</h3>
+                        <p>{t.imageAnalysisDesc}</p>
                     </div>
                     <div className="lp-feature-card">
                         <div className="lp-feature-icon"><Brain size={26} /></div>
-                        <h3>AI Classification</h3>
-                        <p>Classify feed and silage conditions using trained computer vision models.</p>
+                        <h3>{t.aiClassification}</h3>
+                        <p>{t.aiClassificationDesc}</p>
                     </div>
                     <div className="lp-feature-card">
                         <div className="lp-feature-icon"><ClipboardCheck size={26} /></div>
-                        <h3>Quality Evaluation</h3>
-                        <p>Combine AI results with optional test readings for comprehensive scoring.</p>
+                        <h3>{t.qualityEvaluation}</h3>
+                        <p>{t.qualityEvaluationDesc}</p>
                     </div>
                     <div className="lp-feature-card">
                         <div className="lp-feature-icon"><BarChart3 size={26} /></div>
-                        <h3>Reports & History</h3>
-                        <p>Track previous tests and monitor quality trends over time.</p>
+                        <h3>{t.reportsHistory}</h3>
+                        <p>{t.reportsHistoryDesc}</p>
                     </div>
                 </div>
             </section>
@@ -97,46 +96,46 @@ function LandingPage() {
             {/* HOW IT WORKS */}
             <section className="lp-how" id="how-it-works">
                 <div className="lp-section-heading">
-                    <span>HOW IT WORKS</span>
-                    <h2>From sample to recommendation</h2>
+                    <span>{t.howItWorksLabel}</span>
+                    <h2>{t.fromSampleToRec}</h2>
                 </div>
 
                 <div className="lp-steps">
                     <div className="lp-step">
                         <div className="lp-step-num">01</div>
-                        <h3>Upload Sample</h3>
-                        <p>Capture or upload a feed or silage image.</p>
+                        <h3>{t.step1Title}</h3>
+                        <p>{t.step1Desc}</p>
                     </div>
                     <div className="lp-step">
                         <div className="lp-step-num">02</div>
-                        <h3>AI Analysis</h3>
-                        <p>The AI model analyzes visible characteristics.</p>
+                        <h3>{t.step2Title}</h3>
+                        <p>{t.step2Desc}</p>
                     </div>
                     <div className="lp-step">
                         <div className="lp-step-num">03</div>
-                        <h3>Quality Check</h3>
-                        <p>AI findings and readings are evaluated together.</p>
+                        <h3>{t.step3Title}</h3>
+                        <p>{t.step3Desc}</p>
                     </div>
                     <div className="lp-step">
                         <div className="lp-step-num">04</div>
-                        <h3>Get Advice</h3>
-                        <p>Receive a simple result and recommendation.</p>
+                        <h3>{t.step4Title}</h3>
+                        <p>{t.step4Desc}</p>
                     </div>
                 </div>
             </section>
 
             {/* CTA */}
             <section className="lp-cta" id="about">
-                <h2>Ready to analyze your sample?</h2>
-                <p>Start your digital feed and silage quality assessment today.</p>
+                <h2>{t.ctaHeading}</h2>
+                <p>{t.ctaSubheading}</p>
                 <Link to="/register" className="lp-cta-primary">
-                    Get Started <ArrowRight size={17} />
+                    {t.getStarted} <ArrowRight size={17} />
                 </Link>
             </section>
 
             <footer className="lp-footer">
                 <div>© 2026 AgriFeed AI</div>
-                <div>AI-Based Feed &amp; Silage Quality Analysis</div>
+                <div>{t.footerRight}</div>
             </footer>
 
         </div>

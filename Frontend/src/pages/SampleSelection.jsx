@@ -1,104 +1,58 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
-import {
-    ArrowRight,
-    ArrowLeft
-} from "lucide-react";
-
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import AppHeader from "../components/AppHeader";
+import { useLanguage } from "../context/LanguageContext";
 
 function SampleSelection() {
+    const { t } = useLanguage();
 
     return (
         <div className="app-layout">
 
             <Sidebar />
-
             <AppHeader />
 
             <main className="analysis-main">
 
                 <div className="page-top">
-
-                    <Link
-                        to="/dashboard"
-                        className="back-link"
-                    >
+                    <Link to="/dashboard" className="back-link">
                         <ArrowLeft size={17} />
-                        Dashboard
+                        {t.backToDashboard}
                     </Link>
-
                 </div>
 
                 <div className="analysis-heading">
-
-                    <span>NEW ANALYSIS</span>
-
-                    <h1>
-                        What would you like to analyze?
-                    </h1>
-
-                    <p>
-                        Select the type of sample you want
-                        to evaluate.
-                    </p>
-
+                    <span>{t.newAnalysisLabel}</span>
+                    <h1>{t.whatToAnalyze}</h1>
+                    <p>{t.selectSampleType}</p>
                 </div>
 
                 <div className="sample-options">
 
-                    <Link
-                        to="/feed-analysis"
-                        className="sample-option"
-                    >
-
-                        <div className="sample-icon">
-                            🌾
-                        </div>
-
+                    <Link to="/feed-analysis" className="sample-option">
+                        <div className="sample-icon">🌾</div>
                         <div>
-                            <h2>Feed</h2>
-
-                            <p>
-                                Analyze feed quality using an
-                                image and optional measurements
-                                such as moisture, protein and fiber.
-                            </p>
-
+                            <h2>{t.feed}</h2>
+                            <p>{t.feedDesc}</p>
                             <span>
-                                Start Feed Analysis
+                                {t.startFeedAnalysis}
                                 <ArrowRight size={18} />
                             </span>
                         </div>
-
                     </Link>
 
-                    <Link
-                        to="/silage-analysis"
-                        className="sample-option"
-                    >
-
-                        <div className="sample-icon">
-                            🌱
-                        </div>
-
+                    <Link to="/silage-analysis" className="sample-option">
+                        <div className="sample-icon">🌱</div>
                         <div>
-                            <h2>Silage</h2>
-
-                            <p>
-                                Analyze silage condition using
-                                visual characteristics and readings
-                                such as pH, moisture and temperature.
-                            </p>
-
+                            <h2>{t.silage}</h2>
+                            <p>{t.silageDesc}</p>
                             <span>
-                                Start Silage Analysis
+                                {t.startSilageAnalysis}
                                 <ArrowRight size={18} />
                             </span>
                         </div>
-
                     </Link>
 
                 </div>

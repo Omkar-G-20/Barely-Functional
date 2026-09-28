@@ -37,6 +37,14 @@ async function analyzeImage(request, response) {
       });
     }
 
+    // Content-validation error (not a feed/silage image)
+    if (error.isContentValidationError) {
+      return response.status(422).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
     return response.status(500).json({
       success: false,
       error: "An unexpected AI analysis error occurred.",

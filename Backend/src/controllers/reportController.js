@@ -44,7 +44,8 @@ async function download(req, res) {
       `attachment; filename="${filename}"`
     );
 
-    generateAnalysisPDF(analysis, res);
+    const lang = req.query.lang || req.headers["x-language"] || "English";
+    generateAnalysisPDF(analysis, res, lang);
   } catch (error) {
     console.error("PDF generation error:", error);
     if (!res.headersSent) {

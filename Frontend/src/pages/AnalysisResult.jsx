@@ -16,11 +16,13 @@ import AppHeader from "../components/AppHeader";
 import QualityBadge from "../components/QualityBadge";
 import AnnotatedSampleImage from "../components/AnnotatedSampleImage";
 import { api } from "../services/api";
+import { useLanguage } from "../context/LanguageContext";
 
 function AnalysisResult() {
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const analysisId = searchParams.get("id");
+    const { t, language } = useLanguage();
 
     const [analysis, setAnalysis] = useState(location.state?.analysis || null);
     const [loading, setLoading] = useState(!analysis && Boolean(analysisId));
@@ -69,7 +71,7 @@ function AnalysisResult() {
         setDownloading(true);
         try {
             const token = localStorage.getItem("agrisense_token");
-            const res = await fetch(`/api/reports/${analysis.id}/download`, {
+            const res = await fetch(`/api/reports/${analysis.id}/download?lang=${encodeURIComponent(language || "English")}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {}
             });
             if (!res.ok) throw new Error("Download failed");
@@ -121,14 +123,12 @@ function AnalysisResult() {
 
                 <div className="result-header">
 
-                    <span>ANALYSIS COMPLETE • TEST ID: {analysis?.testId || "AG-001"}</span>
+                    <span>{t.analysisComplete} • {t.testIdLabel}: {analysis?.testId || "AG-001"}</span>
 
-                    <h1>
-                        Quality Analysis Result
-                    </h1>
+                    <h1>{t.qualityAnalysisResult}</h1>
 
                     <p>
-                        Your {isFeed ? "feed" : "silage"} sample has been evaluated across all quality &amp; safety parameters.
+                        {isFeed ? t.feedSampleEvaluated : t.silageSampleEvaluated}
                     </p>
 
                 </div>
@@ -148,11 +148,8 @@ function AnalysisResult() {
                         </div>
 
                         <div>
-                            <span>Overall Quality</span>
-
-                            <h2>
-                                {quality}
-                            </h2>
+                            <span>{t.overallQuality}</span>
+                            <h2>{quality}</h2>
                         </div>
 
                     </div>
@@ -165,12 +162,12 @@ function AnalysisResult() {
 
                     <div className="result-panel">
 
-                        <h2>AI Visual Anomaly &amp; Defect Screening</h2>
+                        <h2>{t.aiVisualScreening}</h2>
 
                         {/* Visual Status from Workflow detections */}
                         <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px", margin: "12px 0" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                                <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "700", textTransform: "uppercase" }}>Visual Status</span>
+                                <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "700", textTransform: "uppercase" }}>{t.visualStatus}</span>
                                 <span style={{
                                     fontSize: "12px",
                                     fontWeight: "700",
@@ -190,25 +187,25 @@ function AnalysisResult() {
                         {/* Class Counts Summary */}
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", margin: "1rem 0" }}>
                             <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "10px", textAlign: "center" }}>
-                                <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>MOULD</div>
+                                <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>{t.mould}</div>
                                 <div style={{ fontSize: "20px", fontWeight: "800", color: (analysis?.aiAnalysis?.counts?.mould || 0) > 0 ? "#dc2626" : "#16a34a" }}>
                                     {analysis?.aiAnalysis?.counts?.mould || 0}
                                 </div>
                             </div>
                             <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "10px", textAlign: "center" }}>
-                                <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>DISCOLOR</div>
+                                <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>{t.discolor}</div>
                                 <div style={{ fontSize: "20px", fontWeight: "800", color: (analysis?.aiAnalysis?.counts?.discoloration || 0) > 0 ? "#d97706" : "#16a34a" }}>
                                     {analysis?.aiAnalysis?.counts?.discoloration || 0}
                                 </div>
                             </div>
                             <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "10px", textAlign: "center" }}>
-                                <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>FOREIGN MAT.</div>
+                                <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>{t.foreignMat}</div>
                                 <div style={{ fontSize: "20px", fontWeight: "800", color: (analysis?.aiAnalysis?.counts?.foreign_material || 0) > 0 ? "#dc2626" : "#16a34a" }}>
                                     {analysis?.aiAnalysis?.counts?.foreign_material || 0}
                                 </div>
                             </div>
                             <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "10px", textAlign: "center" }}>
-                                <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>TOTAL</div>
+                                <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>{t.total}</div>
                                 <div style={{ fontSize: "20px", fontWeight: "800", color: "#1e293b" }}>
                                     {analysis?.aiAnalysis?.totalDetections || ((analysis?.aiAnalysis?.counts?.mould || 0) + (analysis?.aiAnalysis?.counts?.discoloration || 0) + (analysis?.aiAnalysis?.counts?.foreign_material || 0))}
                                 </div>
@@ -227,15 +224,15 @@ function AnalysisResult() {
                         {analysis?.aiAnalysis?.predictions && analysis.aiAnalysis.predictions.length > 0 && (
                             <div style={{ marginTop: "1rem" }}>
                                 <span style={{ fontSize: "12px", color: "#475569", fontWeight: "600", display: "block", marginBottom: "6px" }}>
-                                    Detected Anomalies ({analysis.aiAnalysis.predictions.length}):
+                                    {t.detectedAnomalies} ({analysis.aiAnalysis.predictions.length}):
                                 </span>
                                 <div style={{ maxHeight: "150px", overflowY: "auto", border: "1px solid #e2e8f0", borderRadius: "6px" }}>
                                     <table style={{ width: "100%", fontSize: "12px", borderCollapse: "collapse" }}>
                                         <thead>
                                             <tr style={{ background: "#f1f5f9", textAlign: "left" }}>
-                                                <th style={{ padding: "6px 8px" }}>Anomaly</th>
-                                                <th style={{ padding: "6px 8px" }}>Confidence</th>
-                                                <th style={{ padding: "6px 8px" }}>Location</th>
+                                                <th style={{ padding: "6px 8px" }}>{t.anomaly}</th>
+                                                <th style={{ padding: "6px 8px" }}>{t.confidence}</th>
+                                                <th style={{ padding: "6px 8px" }}>{t.location}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -262,58 +259,41 @@ function AnalysisResult() {
 
                     <div className="result-panel">
 
-                        <h2>Measured Parameters</h2>
+                        <h2>{t.measuredParameters}</h2>
 
                         <div className="reading-list">
 
                             {measurements.moisture !== undefined && measurements.moisture !== null && (
-                                <div>
-                                    <span>Moisture</span>
-                                    <strong>{measurements.moisture}%</strong>
-                                </div>
+                                <div><span>{t.moistureLabel}</span><strong>{measurements.moisture}%</strong></div>
                             )}
 
                             {measurements.protein !== undefined && measurements.protein !== null && (
-                                <div>
-                                    <span>Crude Protein</span>
-                                    <strong>{measurements.protein}%</strong>
-                                </div>
+                                <div><span>{t.crudeProteinLabel}</span><strong>{measurements.protein}%</strong></div>
                             )}
 
                             {measurements.fiber !== undefined && measurements.fiber !== null && (
-                                <div>
-                                    <span>Crude Fiber</span>
-                                    <strong>{measurements.fiber}%</strong>
-                                </div>
+                                <div><span>{t.crudeFiberLabel}</span><strong>{measurements.fiber}%</strong></div>
                             )}
 
                             {measurements.aflatoxin !== undefined && measurements.aflatoxin !== null && (
                                 <div>
-                                    <span>Aflatoxin (ppb)</span>
+                                    <span>{t.aflatoxinLabel}</span>
                                     <strong style={{ color: Number(measurements.aflatoxin) > 20 ? "#d32f2f" : "#2e7d32" }}>
-                                        {measurements.aflatoxin} ppb {Number(measurements.aflatoxin) > 20 ? "(Warning)" : "(Safe)"}
+                                        {measurements.aflatoxin} ppb {Number(measurements.aflatoxin) > 20 ? t.warningLabel : t.safeLabel}
                                     </strong>
                                 </div>
                             )}
 
                             {measurements.ph !== undefined && measurements.ph !== null && (
-                                <div>
-                                    <span>pH Level</span>
-                                    <strong>{measurements.ph}</strong>
-                                </div>
+                                <div><span>{t.phLevelLabel}</span><strong>{measurements.ph}</strong></div>
                             )}
 
                             {measurements.temperature !== undefined && measurements.temperature !== null && (
-                                <div>
-                                    <span>Temperature</span>
-                                    <strong>{measurements.temperature}°C</strong>
-                                </div>
+                                <div><span>{t.temperatureLabel}</span><strong>{measurements.temperature}°C</strong></div>
                             )}
 
                             {Object.values(measurements).every(v => v === null || v === undefined) && (
-                                <p style={{ color: "#777", fontSize: "14px" }}>
-                                    No physical readings entered. Screening based on visual parameters.
-                                </p>
+                                <p style={{ color: "#777", fontSize: "14px" }}>{t.noReadingsEntered}</p>
                             )}
 
                         </div>
@@ -330,10 +310,10 @@ function AnalysisResult() {
 
                     <div>
 
-                        <span>RECOMMENDATIONS</span>
+                        <span>{t.recommendations}</span>
 
                         <h2>
-                            {recommendations.length > 0 ? recommendations[0] : "Sample appears suitable based on available inputs."}
+                            {recommendations.length > 0 ? recommendations[0] : t.sampleSuitable}
                         </h2>
 
                         <ul style={{ margin: "0.75rem 0", paddingLeft: "1.2rem", color: "#444" }}>
@@ -342,12 +322,8 @@ function AnalysisResult() {
                             ))}
                         </ul>
 
-                        <Link
-                            to="/advisory"
-                            state={{ analysis }}
-                            className="text-link"
-                        >
-                            View Detailed Advisory
+                        <Link to="/advisory" state={{ analysis }} className="text-link">
+                            {t.viewDetailedAdvisory}
                             <ArrowRight size={17} />
                         </Link>
 
@@ -357,27 +333,16 @@ function AnalysisResult() {
 
                 <div className="result-actions">
 
-                    <Link
-                        to="/sample-selection"
-                        className="secondary-button"
-                    >
+                    <Link to="/sample-selection" className="secondary-button">
                         <RotateCcw size={17} />
-                        New Analysis
+                        {t.newAnalysisBtn2}
                     </Link>
 
-                    <button
-                        className="primary-button"
-                        onClick={handleDownloadPDF}
-                        disabled={downloading}
-                    >
+                    <button className="primary-button" onClick={handleDownloadPDF} disabled={downloading}>
                         {downloading ? (
-                            <>
-                                <Loader2 size={17} className="spin" /> Generating PDF...
-                            </>
+                            <><Loader2 size={17} className="spin" /> {t.generatingPDFBtn}</>
                         ) : (
-                            <>
-                                <Download size={17} /> Download PDF Report
-                            </>
+                            <><Download size={17} /> {t.downloadPDFReport}</>
                         )}
                     </button>
 

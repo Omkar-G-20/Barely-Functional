@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, Globe } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import AppHeader from "../components/AppHeader";
 import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
+
+const LANGUAGES = [
+    { value: "English",  label: "English",           flag: "🇬🇧" },
+    { value: "Hindi",    label: "हिंदी (Hindi)",      flag: "🇮🇳" },
+    { value: "Marathi",  label: "मराठी (Marathi)",    flag: "🇮🇳" },
+    { value: "Kannada",  label: "ಕನ್ನಡ (Kannada)",   flag: "🇮🇳" },
+];
 
 function ProfilePage() {
     const { refreshUser } = useAuth();
+    const { t, language, setLanguage } = useLanguage();
+
     const [profile, setProfile] = useState({
         name: "",
         email: "",
@@ -78,17 +88,9 @@ function ProfilePage() {
             <main className="dashboard-main">
 
                 <div className="page-heading">
-
-                    <span>ACCOUNT</span>
-
-                    <h1>
-                        My Profile
-                    </h1>
-
-                    <p>
-                        Manage your farmer account and farm information.
-                    </p>
-
+                    <span>{t.accountLabel}</span>
+                    <h1>{t.myProfile}</h1>
+                    <p>{t.profileSubtitle}</p>
                 </div>
 
                 {loading ? (
@@ -97,26 +99,16 @@ function ProfilePage() {
                     </div>
                 ) : (
                     <>
+                        {/* ── Profile Card ── */}
                         <div className="profile-card">
-
-                            <div className="profile-avatar">
-                                {initial}
-                            </div>
-
+                            <div className="profile-avatar">{initial}</div>
                             <div className="profile-details">
-
-                                <h2>
-                                    {profile.name || "Farmer"}
-                                </h2>
-
-                                <p>
-                                    {profile.email || "farmer@example.com"}
-                                </p>
-
+                                <h2>{profile.name || "Farmer"}</h2>
+                                <p>{profile.email || "farmer@example.com"}</p>
                             </div>
-
                         </div>
 
+                        {/* ── Success / Error banners ── */}
                         {savedSuccess && (
                             <div style={{
                                 padding: "0.75rem 1rem",
@@ -129,7 +121,7 @@ function ProfilePage() {
                                 marginBottom: "1.5rem",
                                 fontWeight: "500"
                             }}>
-                                <CheckCircle2 size={18} /> Profile updated successfully!
+                                <CheckCircle2 size={18} /> {t.profileUpdated}
                             </div>
                         )}
 
@@ -145,39 +137,36 @@ function ProfilePage() {
                             </div>
                         )}
 
+                        {/* ── Profile Form ── */}
                         <form className="settings-form" onSubmit={handleSave}>
 
-                            <label>Full Name</label>
-
+                            <label>{t.fullName}</label>
                             <input
                                 value={profile.name}
                                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                                placeholder="Enter your full name"
+                                placeholder={t.enterFullName}
                             />
 
-                            <label>Email (Read-only)</label>
-
+                            <label>{t.emailReadOnly}</label>
                             <input
                                 value={profile.email}
                                 readOnly
                                 style={{ opacity: 0.7, cursor: "not-allowed" }}
                             />
 
-                            <label>Mobile Number</label>
-
+                            <label>{t.mobileNumber}</label>
                             <input
                                 value={profile.phone}
                                 onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                                placeholder="Enter mobile number"
+                                placeholder={t.enterMobile}
                             />
 
-                            <label>Farm Information</label>
-
+                            <label>{t.farmInformation}</label>
                             <textarea
                                 rows={4}
                                 value={profile.farmInformation}
                                 onChange={(e) => setProfile({ ...profile, farmInformation: e.target.value })}
-                                placeholder="Enter details about your farm, location, or cattle herd"
+                                placeholder={t.enterFarmInfo}
                             />
 
                             <button
@@ -188,14 +177,95 @@ function ProfilePage() {
                             >
                                 {saving ? (
                                     <>
-                                        <Loader2 size={16} className="spin" /> Saving Changes...
+                                        <Loader2 size={16} className="spin" /> {t.savingChanges}
                                     </>
                                 ) : (
-                                    "Save Changes"
+                                    t.saveChanges
                                 )}
                             </button>
 
                         </form>
+
+                        {/* ════════════════════════════════════════
+                            ──  SETTINGS SECTION  ──
+                            ════════════════════════════════════════ */}
+                        <div style={{ marginTop: "2.5rem" }}>
+
+                            <div className="page-heading" style={{ marginBottom: "1rem", paddingBottom: 0 }}>
+                                <span>{t.settingsSection.toUpperCase()}</span>
+                                <h2 style={{ fontSize: "1.4rem", marginBottom: "0.25rem" }}>
+                                    {t.settingsSection}
+                                </h2>
+                            </div>
+
+                            <div className="settings-card">
+
+                                {/* ── Language Row ── */}
+                                <div className="setting-row" style={{ alignItems: "flex-start", gap: "1.5rem" }}>
+
+                                    <div style={{ flex: 1 }}>
+                                        <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                            <Globe size={18} color="var(--color-primary, #1b5e20)" />
+                                            {t.languageSection}
+                                        </h3>
+                                        <p style={{ marginTop: "0.25rem" }}>{t.languageSectionDesc}</p>
+                                    </div>
+
+                                    {/* Language cards grid */}
+                                    <div style={{
+                                        display: "grid",
+                                        gridTemplateColumns: "repeat(2, 1fr)",
+                                        gap: "0.6rem",
+                                        minWidth: "260px"
+                                    }}>
+                                        {LANGUAGES.map((lang) => {
+                                            const isActive = language === lang.value;
+                                            return (
+                                                <button
+                                                    key={lang.value}
+                                                    type="button"
+                                                    onClick={() => setLanguage(lang.value)}
+                                                    style={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: "8px",
+                                                        padding: "0.55rem 0.8rem",
+                                                        borderRadius: "10px",
+                                                        border: isActive
+                                                            ? "2px solid var(--color-primary, #1b5e20)"
+                                                            : "2px solid transparent",
+                                                        background: isActive
+                                                            ? "var(--color-primary-light, #e8f5e9)"
+                                                            : "var(--color-surface, #f5f5f5)",
+                                                        color: isActive
+                                                            ? "var(--color-primary, #1b5e20)"
+                                                            : "var(--color-text, #333)",
+                                                        fontWeight: isActive ? "600" : "400",
+                                                        fontSize: "0.82rem",
+                                                        cursor: "pointer",
+                                                        transition: "all 0.18s ease",
+                                                        textAlign: "left",
+                                                        lineHeight: 1.3,
+                                                    }}
+                                                >
+                                                    <span style={{ fontSize: "1.2rem" }}>{lang.flag}</span>
+                                                    <span>{lang.label}</span>
+                                                    {isActive && (
+                                                        <CheckCircle2
+                                                            size={14}
+                                                            style={{ marginLeft: "auto" }}
+                                                        />
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
                     </>
                 )}
 

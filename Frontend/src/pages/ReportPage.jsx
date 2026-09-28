@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-    Download,
-    FileText,
-    Loader2
-} from "lucide-react";
-
+import { Download, FileText, Loader2 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import AppHeader from "../components/AppHeader";
 import QualityBadge from "../components/QualityBadge";
 import { api } from "../services/api";
+import { useLanguage } from "../context/LanguageContext";
 
 function ReportPage() {
+    const { t, language } = useLanguage();
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [downloadingId, setDownloadingId] = useState(null);
@@ -37,7 +34,7 @@ function ReportPage() {
         setDownloadingId(report.id);
         try {
             const token = localStorage.getItem("agrisense_token");
-            const res = await fetch(`/api/reports/${report.id}/download`, {
+            const res = await fetch(`/api/reports/${report.id}/download?lang=${encodeURIComponent(language || "English")}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {}
             });
             if (!res.ok) throw new Error("Download request failed");
@@ -62,27 +59,16 @@ function ReportPage() {
         <div className="app-layout">
 
             <Sidebar />
-
             <AppHeader />
 
             <main className="dashboard-main">
 
                 <div className="page-heading">
-
                     <div>
-
-                        <span>REPORTS</span>
-
-                        <h1>
-                            Analysis Reports
-                        </h1>
-
-                        <p>
-                            Download official PDF quality &amp; safety assessment reports.
-                        </p>
-
+                        <span>{t.reportsLabel}</span>
+                        <h1>{t.analysisReports}</h1>
+                        <p>{t.reportsSubtitle}</p>
                     </div>
-
                 </div>
 
                 <div className="report-list">
@@ -93,13 +79,15 @@ function ReportPage() {
                         </div>
                     ) : reports.length === 0 ? (
                         <div style={{ textAlign: "center", padding: "2.5rem", color: "#666" }}>
-                            <p>No reports generated yet. Perform a new analysis to create a report.</p>
+                            <p>{t.noReports}</p>
                         </div>
                     ) : (
                         reports.map((rep) => {
                             const formattedDate = rep.date
                                 ? new Date(rep.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
                                 : "Recent";
+
+                            const reportTitle = rep.title || (rep.sampleType === "feed" ? t.feedQualityReport : t.silageQualityReport);
 
                             return (
                                 <div className="report-item" key={rep.id}>
@@ -109,18 +97,13 @@ function ReportPage() {
                                     </div>
 
                                     <div style={{ flex: 1 }}>
-
                                         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                            <h3>
-                                                {rep.title || `${rep.sampleType === "feed" ? "Feed" : "Silage"} Quality Report`}
-                                            </h3>
+                                            <h3>{reportTitle}</h3>
                                             <QualityBadge status={rep.quality || "GOOD"} />
                                         </div>
-
                                         <p>
-                                            Test ID: {rep.testId || rep.id} • {formattedDate}
+                                            {t.testId}: {rep.testId || rep.id} • {formattedDate}
                                         </p>
-
                                     </div>
 
                                     <button
@@ -129,13 +112,9 @@ function ReportPage() {
                                         disabled={downloadingId === rep.id}
                                     >
                                         {downloadingId === rep.id ? (
-                                            <>
-                                                <Loader2 size={16} className="spin" /> Generating PDF...
-                                            </>
+                                            <><Loader2 size={16} className="spin" /> {t.generatingPDF}</>
                                         ) : (
-                                            <>
-                                                <Download size={17} /> Download PDF
-                                            </>
+                                            <><Download size={17} /> {t.downloadPDF}</>
                                         )}
                                     </button>
 

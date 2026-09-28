@@ -15,10 +15,12 @@ import AppHeader from "../components/AppHeader";
 import StatCard from "../components/StatCard";
 import TestCard from "../components/TestCard";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import { api } from "../services/api";
 
 function Dashboard() {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const [stats, setStats] = useState({
         totalTests: 0,
         goodQuality: 0,
@@ -67,9 +69,9 @@ function Dashboard() {
 
                 <header className="dashboard-header">
                     <div>
-                        <p className="dashboard-label">DASHBOARD</p>
-                        <h1>Good day, {userName} 👋</h1>
-                        <p>Here's your real-time quality analysis overview.</p>
+                        <p className="dashboard-label">{t.dashboardLabel}</p>
+                        <h1>{t.goodDay}, {userName} 👋</h1>
+                        <p>{t.dashboardSubtitle}</p>
                     </div>
 
                     <Link
@@ -77,37 +79,37 @@ function Dashboard() {
                         className="primary-button"
                     >
                         <ScanSearch size={18} />
-                        New Analysis
+                        {t.newAnalysisBtn}
                     </Link>
                 </header>
 
                 <section className="stats-grid">
 
                     <StatCard
-                        title="Total Tests"
+                        title={t.totalTests}
                         value={String(stats.totalTests)}
-                        subtitle={stats.totalTests > 0 ? `${stats.totalTests} completed tests` : "No tests yet"}
+                        subtitle={stats.totalTests > 0 ? `${stats.totalTests} ${t.completedTests}` : t.noTestsYet}
                         icon={<ScanSearch />}
                     />
 
                     <StatCard
-                        title="Good Quality"
+                        title={t.goodQuality}
                         value={String(stats.goodQuality)}
-                        subtitle={`${goodPercent}% of total tests`}
+                        subtitle={`${goodPercent}${t.ofTotalTests}`}
                         icon={<CheckCircle2 />}
                     />
 
                     <StatCard
-                        title="Average Quality"
+                        title={t.averageQuality}
                         value={String(stats.averageQuality)}
-                        subtitle={`${avgPercent}% of total tests`}
+                        subtitle={`${avgPercent}${t.ofTotalTests}`}
                         icon={<AlertTriangle />}
                     />
 
                     <StatCard
-                        title="Poor Quality"
+                        title={t.poorQuality}
                         value={String(stats.poorQuality)}
-                        subtitle={`${poorPercent}% of total tests`}
+                        subtitle={`${poorPercent}${t.ofTotalTests}`}
                         icon={<XCircle />}
                     />
 
@@ -120,12 +122,12 @@ function Dashboard() {
                         <div className="panel-header">
 
                             <div>
-                                <h2>Recent Tests</h2>
-                                <p>Your latest quality analyses</p>
+                                <h2>{t.recentTests}</h2>
+                                <p>{t.latestAnalyses}</p>
                             </div>
 
                             <Link to="/history">
-                                View All
+                                {t.viewAll}
                             </Link>
 
                         </div>
@@ -138,9 +140,9 @@ function Dashboard() {
                                 </div>
                             ) : recentTests.length === 0 ? (
                                 <div style={{ textAlign: "center", padding: "2rem", color: "var(--color-text-secondary, #666)" }}>
-                                    <p>No recent tests found.</p>
+                                    <p>{t.noRecentTests}</p>
                                     <Link to="/sample-selection" className="small-button" style={{ marginTop: "0.5rem", display: "inline-block" }}>
-                                        Start your first test
+                                        {t.startFirstTest}
                                     </Link>
                                 </div>
                             ) : (
@@ -160,8 +162,8 @@ function Dashboard() {
 
                         <div className="panel-header">
                             <div>
-                                <h2>Quality Overview</h2>
-                                <p>Current test distribution</p>
+                                <h2>{t.qualityOverview}</h2>
+                                <p>{t.testDistribution}</p>
                             </div>
                         </div>
 
@@ -181,7 +183,7 @@ function Dashboard() {
                             >
                                 <div>
                                     <strong>{stats.totalTests}</strong>
-                                    <span>Tests</span>
+                                    <span>{t.tests}</span>
                                 </div>
                             </div>
 
@@ -189,19 +191,19 @@ function Dashboard() {
 
                                 <div>
                                     <span className="legend good"></span>
-                                    Good
+                                    {t.good}
                                     <strong>{stats.goodQuality}</strong>
                                 </div>
 
                                 <div>
                                     <span className="legend average"></span>
-                                    Average
+                                    {t.average}
                                     <strong>{stats.averageQuality}</strong>
                                 </div>
 
                                 <div>
                                     <span className="legend poor"></span>
-                                    Poor
+                                    {t.poor}
                                     <strong>{stats.poorQuality}</strong>
                                 </div>
 
@@ -220,13 +222,8 @@ function Dashboard() {
                     </div>
 
                     <div>
-                        <h3>Quality Monitoring Tip</h3>
-
-                        <p>
-                            Regularly monitor moisture, pH and
-                            storage conditions along with visual
-                            quality indicators.
-                        </p>
+                        <h3>{t.qualityTip}</h3>
+                        <p>{t.qualityTipText}</p>
                     </div>
 
                 </section>

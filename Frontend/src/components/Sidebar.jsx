@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-
 import {
     LayoutDashboard,
     ScanSearch,
@@ -10,37 +9,22 @@ import {
     Menu,
     X
 } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 function Sidebar() {
-
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { t } = useLanguage();
 
     const menu = [
-        {
-            name: "Dashboard",
-            path: "/dashboard",
-            icon: LayoutDashboard
-        },
-        {
-            name: "New Analysis",
-            path: "/sample-selection",
-            icon: ScanSearch
-        },
-        {
-            name: "Test History",
-            path: "/history",
-            icon: History
-        },
-        {
-            name: "Reports",
-            path: "/report",
-            icon: FileText
-        }
+        { key: "dashboard",    path: "/dashboard",        icon: LayoutDashboard },
+        { key: "newAnalysis",  path: "/sample-selection", icon: ScanSearch },
+        { key: "testHistory",  path: "/history",           icon: History },
+        { key: "reports",      path: "/report",            icon: FileText },
     ];
 
     return (
         <>
-            {/* Mobile hamburger toggle (visible only on small screens) */}
+            {/* Mobile hamburger toggle */}
             <button
                 className="sidebar-hamburger"
                 onClick={() => setMobileOpen(!mobileOpen)}
@@ -71,7 +55,7 @@ function Sidebar() {
                         const Icon = item.icon;
                         return (
                             <NavLink
-                                key={item.name}
+                                key={item.key}
                                 to={item.path}
                                 onClick={() => setMobileOpen(false)}
                                 className={({ isActive }) =>
@@ -79,7 +63,7 @@ function Sidebar() {
                                 }
                             >
                                 <Icon size={19} />
-                                <span>{item.name}</span>
+                                <span>{t[item.key]}</span>
                             </NavLink>
                         );
                     })}
