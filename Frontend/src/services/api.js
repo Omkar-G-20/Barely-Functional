@@ -2,7 +2,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export function getToken() {
   try {
-    return localStorage.getItem("agrisense_token") || null;
+    return localStorage.getItem("agrifeed_token") || localStorage.getItem("agrisense_token") || null;
   } catch (e) {
     return null;
   }
@@ -11,8 +11,9 @@ export function getToken() {
 export function setToken(token) {
   try {
     if (token) {
-      localStorage.setItem("agrisense_token", token);
+      localStorage.setItem("agrifeed_token", token);
     } else {
+      localStorage.removeItem("agrifeed_token");
       localStorage.removeItem("agrisense_token");
     }
   } catch (e) {
@@ -22,7 +23,7 @@ export function setToken(token) {
 
 export function getStoredUser() {
   try {
-    const user = localStorage.getItem("agrisense_user");
+    const user = localStorage.getItem("agrifeed_user") || localStorage.getItem("agrisense_user");
     if (!user || user === "undefined" || user === "null") return null;
     return JSON.parse(user);
   } catch (e) {
@@ -33,8 +34,9 @@ export function getStoredUser() {
 export function setStoredUser(user) {
   try {
     if (user) {
-      localStorage.setItem("agrisense_user", JSON.stringify(user));
+      localStorage.setItem("agrifeed_user", JSON.stringify(user));
     } else {
+      localStorage.removeItem("agrifeed_user");
       localStorage.removeItem("agrisense_user");
     }
   } catch (e) {

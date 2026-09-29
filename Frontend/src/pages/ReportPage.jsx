@@ -44,7 +44,7 @@ function ReportPage() {
     const handleDownloadPDF = async (report) => {
         setDownloadingId(report.id);
         try {
-            const token = localStorage.getItem("agrisense_token");
+            const token = localStorage.getItem("agrifeed_token") || localStorage.getItem("agrisense_token");
             const res = await fetch(`/api/reports/${report.id}/download?lang=${encodeURIComponent(language || "English")}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {}
             });

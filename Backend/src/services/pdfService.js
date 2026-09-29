@@ -30,7 +30,7 @@ function resolveLocalImage(imagePath) {
 
 const PDF_TRANSLATIONS = {
   English: {
-    reportTitle: "AgriSense AI Quality & Advisory Report",
+    reportTitle: "AgriFeed AI Quality & Advisory Report",
     reportSubtitle: "Official AI-Powered Feed & Silage Safety Assessment",
     testId: "Test ID",
     sampleType: "Sample Type",
@@ -74,10 +74,10 @@ const PDF_TRANSLATIONS = {
     heating: "Heating",
     optimalFerment: "Optimal Fermentation",
     section3: "3. Actionable Farmer Recommendations",
-    disclaimer: "AgriSense AI Assessment Notice: This report provides automated digital screening and advisory. For critical aflatoxin poisoning or clinical diagnosis, certified veterinary laboratory analysis is recommended."
+    disclaimer: "AgriFeed AI Assessment Notice: This report provides automated digital screening and advisory. For critical aflatoxin poisoning or clinical diagnosis, certified veterinary laboratory analysis is recommended."
   },
   Hindi: {
-    reportTitle: "AgriSense AI गुणवत्ता और परामर्श रिपोर्ट",
+    reportTitle: "AgriFeed AI गुणवत्ता और परामर्श रिपोर्ट",
     reportSubtitle: "आधिकारिक AI-संचालित चारा और साइलेज सुरक्षा मूल्यांकन",
     testId: "परीक्षण आईडी",
     sampleType: "नमूना प्रकार",
@@ -121,10 +121,10 @@ const PDF_TRANSLATIONS = {
     heating: "गर्म",
     optimalFerment: "इष्टतम किण्वन",
     section3: "3. किसानों के लिए महत्वपूर्ण सिफारिशें",
-    disclaimer: "AgriSense AI मूल्यांकन सूचना: यह रिपोर्ट स्वचालित डिजिटल स्क्रीनिंग और सलाह प्रदान करती है। गंभीर विष संदूषण या नैदानिक निदान के लिए प्रमाणित पशु चिकित्सा प्रयोगशाला परीक्षण की सिफारिश की जाती है।"
+    disclaimer: "AgriFeed AI मूल्यांकन सूचना: यह रिपोर्ट स्वचालित डिजिटल स्क्रीनिंग और सलाह प्रदान करती है। गंभीर विष संदूषण या नैदानिक निदान के लिए प्रमाणित पशु चिकित्सा प्रयोगशाला परीक्षण की सिफारिश की जाती है।"
   },
   Marathi: {
-    reportTitle: "AgriSense AI गुणवत्ता आणि सल्लागार अहवाल",
+    reportTitle: "AgriFeed AI गुणवत्ता आणि सल्लागार अहवाल",
     reportSubtitle: "अधिकृत AI-आधारित चारा आणि सायलेज सुरक्षा मूल्यांकन",
     testId: "चाचणी आयडी",
     sampleType: "नमुना प्रकार",
@@ -168,10 +168,10 @@ const PDF_TRANSLATIONS = {
     heating: "उष्ण",
     optimalFerment: "इष्टतम किण्वन",
     section3: "3. शेतकऱ्यांसाठी महत्त्वाच्या शिफारसी",
-    disclaimer: "AgriSense AI मूल्यांकन सूचना: हा अहवाल स्वयंचलित डिजिटल तपासणी आणि सल्ला देतो. गंभीर विषबाधा किंवा वैद्यकीय निदानासाठी प्रमाणित पशुवैद्यकीय प्रयोगशाळा चाचणीची शिफारस केली जाते."
+    disclaimer: "AgriFeed AI मूल्यांकन सूचना: हा अहवाल स्वयंचलित डिजिटल तपासणी आणि सल्ला देतो. गंभीर विषबाधा किंवा वैद्यकीय निदानासाठी प्रमाणित पशुवैद्यकीय प्रयोगशाळा चाचणीची शिफारस केली जाते."
   },
   Kannada: {
-    reportTitle: "AgriSense AI ಗುಣಮಟ್ಟ ಮತ್ತು ಸಲಹಾ ವರದಿ",
+    reportTitle: "AgriFeed AI ಗುಣಮಟ್ಟ ಮತ್ತು ಸಲಹಾ ವರದಿ",
     reportSubtitle: "ಅಧಿಕೃತ AI-ಚಾಲಿತ ಮೇವು ಮತ್ತು ಸೈಲೇಜ್ ಸುರಕ್ಷತಾ ಮೌಲ್ಯಮಾಪನ",
     testId: "ಪರೀಕ್ಷಾ ID",
     sampleType: "ಮಾದರಿ ಪ್ರಕಾರ",
@@ -215,7 +215,7 @@ const PDF_TRANSLATIONS = {
     heating: "ಬಿಸಿ",
     optimalFerment: "ಉತ್ತಮ ಹುದುಗುವಿಕೆ",
     section3: "3. ರೈತರಿಗೆ ಕ್ರಿಯಾತ್ಮಕ ಶಿಫಾರಸುಗಳು",
-    disclaimer: "AgriSense AI ಮೌಲ್ಯಮಾಪನ ಸೂಚನೆ: ಈ ವರದಿಯು ಸ್ವಯಂಚಾಲಿತ ಡಿಜಿಟಲ್ ತಪಾಸಣೆ ಮತ್ತು ಸಲಹೆಯನ್ನು ಒದಗಿಸುತ್ತದೆ. ಗಂಭೀರ ವಿಷಪೂರಿತತೆ ಅಥವಾ ಚಿಕಿತ್ಸಾಲಯ ರೋಗನಿರ್ಣಯಕ್ಕಾಗಿ, ಪ್ರಮಾಣೀಕೃತ ಪಶುವೈದ್ಯಕೀಯ ಪ್ರಯೋಗಾಲಯ ಪರೀಕ್ಷೆಯನ್ನು ಶಿಫಾರಸು ಮಾಡಲಾಗುತ್ತದೆ."
+    disclaimer: "AgriFeed AI ಮೌಲ್ಯಮಾಪನ ಸೂಚನೆ: ಈ ವರದಿಯು ಸ್ವಯಂಚಾಲಿತ ಡಿಜಿಟಲ್ ತಪಾಸಣೆ ಮತ್ತು ಸಲಹೆಯನ್ನು ಒದಗಿಸುತ್ತದೆ. ಗಂಭೀರ ವಿಷಪೂರಿತತೆ ಅಥವಾ ಚಿಕಿತ್ಸಾಲಯ ರೋಗನಿರ್ಣಯಕ್ಕಾಗಿ, ಪ್ರಮಾಣೀಕೃತ ಪಶುವೈದ್ಯಕೀಯ ಪ್ರಯೋಗಾಲಯ ಪರೀಕ್ಷೆಯನ್ನು ಶಿಫಾರಸು ಮಾಡಲಾಗುತ್ತದೆ."
   }
 };
 

@@ -70,7 +70,7 @@ function AnalysisResult() {
         if (!analysis?.id) return;
         setDownloading(true);
         try {
-            const token = localStorage.getItem("agrisense_token");
+            const token = localStorage.getItem("agrifeed_token") || localStorage.getItem("agrisense_token");
             const res = await fetch(`/api/reports/${analysis.id}/download?lang=${encodeURIComponent(language || "English")}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {}
             });

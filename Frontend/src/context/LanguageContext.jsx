@@ -67,7 +67,7 @@ export const translations = {
         // Settings Page
         settingsLabel: "SETTINGS",
         appSettings: "Application Settings",
-        customizeExperience: "Customize your AgriSense AI experience.",
+        customizeExperience: "Customize your AgriFeed AI experience.",
         chooseLanguage: "Choose your preferred language.",
 
         // Sample Selection
@@ -436,7 +436,7 @@ export const translations = {
         settingsSaved: "सेटिंग्स सहेजी गईं!",
         settingsLabel: "सेटिंग्स",
         appSettings: "एप्लिकेशन सेटिंग्स",
-        customizeExperience: "अपना AgriSense AI अनुभव अनुकूलित करें।",
+        customizeExperience: "अपना AgriFeed AI अनुभव अनुकूलित करें।",
         chooseLanguage: "अपनी पसंदीदा भाषा चुनें।",
         features: "सुविधाएं",
         howItWorks: "यह कैसे काम करता है",
@@ -673,7 +673,7 @@ export const translations = {
         settingsSaved: "सेटिंग्ज जतन झाल्या!",
         settingsLabel: "सेटिंग्ज",
         appSettings: "अॅप्लिकेशन सेटिंग्ज",
-        customizeExperience: "तुमचा AgriSense AI अनुभव सानुकूलित करा.",
+        customizeExperience: "तुमचा AgriFeed AI अनुभव सानुकूलित करा.",
         chooseLanguage: "तुमची पसंतीची भाषा निवडा.",
         features: "वैशिष्ट्ये",
         howItWorks: "हे कसे कार्य करते",
@@ -839,7 +839,7 @@ export const translations = {
         settingsSaved: "ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಉಳಿಸಲಾಗಿದೆ!",
         settingsLabel: "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
         appSettings: "ಅಪ್ಲಿಕೇಶನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
-        customizeExperience: "ನಿಮ್ಮ AgriSense AI ಅನುಭವವನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ.",
+        customizeExperience: "ನಿಮ್ಮ AgriFeed AI ಅನುಭವವನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ.",
         chooseLanguage: "ನಿಮ್ಮ ಆದ್ಯತೆಯ ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ.",
         features: "ವೈಶಿಷ್ಟ್ಯಗಳು",
         howItWorks: "ಇದು ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ",

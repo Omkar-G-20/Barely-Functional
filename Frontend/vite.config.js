@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icon.svg", "cattle_hero.jpg", "silage_hands.jpg"],
       manifest: {
-        name: "AgriSense AI – Feed & Silage Quality",
-        short_name: "AgriSense AI",
+        name: "AgriFeed AI – Feed & Silage Quality",
+        short_name: "AgriFeed AI",
         description:
           "AI-powered feed and silage quality assessment for dairy farmers. Works offline.",
         theme_color: "#1b5e20",
@@ -43,7 +43,7 @@ export default defineConfig({
         screenshots: [],
       },
       workbox: {
-        // Allow larger images (like high-res feed background) in offline precache
+        // Allow larger images in offline precache
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         // Cache all app shell resources aggressively
         globPatterns: ["**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2}"],
@@ -55,7 +55,7 @@ export default defineConfig({
             urlPattern: /^https?:\/\/.*\/api\/reports/,
             handler: "NetworkFirst",
             options: {
-              cacheName: "agrisense-reports-cache",
+              cacheName: "agrifeed-reports-cache",
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24, // 24 hours
@@ -69,7 +69,7 @@ export default defineConfig({
             urlPattern: /^https?:\/\/.*\/api\/analyses/,
             handler: "NetworkFirst",
             options: {
-              cacheName: "agrisense-analyses-cache",
+              cacheName: "agrifeed-analyses-cache",
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 48, // 48 hours
@@ -83,7 +83,7 @@ export default defineConfig({
             urlPattern: /^https?:\/\/.*\/uploads\//,
             handler: "CacheFirst",
             options: {
-              cacheName: "agrisense-images-cache",
+              cacheName: "agrifeed-images-cache",
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
@@ -106,9 +106,9 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api\//],
       },
 
-      // Dev mode: show service worker in dev for testing
+      // Dev mode: enable PWA service worker during development for testing
       devOptions: {
-        enabled: false,
+        enabled: true,
       },
     }),
   ],

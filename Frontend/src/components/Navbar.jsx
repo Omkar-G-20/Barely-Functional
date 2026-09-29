@@ -11,7 +11,7 @@ function Navbar() {
                     <Leaf size={22} />
                 </div>
 
-                <span>AgriSense AI</span>
+                <span>AgriFeed AI</span>
             </Link>
 
             <div className="nav-links">
