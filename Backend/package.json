@@ -1,7 +1,7 @@
 {
   "name": "agrifeed-ai-backend",
   "version": "1.0.0",
-  "description": "Backend API for AgriFeed AI feed and silage quality analysis",
+  "description": "Backend API for AgriFeed feed and silage quality analysis",
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",

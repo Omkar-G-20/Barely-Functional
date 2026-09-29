@@ -1,6 +1,6 @@
-# AgriFeed AI - Intelligent Cattle Feed & Silage Quality Assessment
+# AgriFeed - Intelligent Cattle Feed & Silage Quality Assessment
 
-AgriFeed AI is an AI-powered agricultural quality analysis platform designed to help dairy farmers, feed mills, and livestock managers assess cattle feed and silage quality instantly using computer vision (Roboflow Google Gemini 3.1 Pro Workflow) and chemical parameter analysis.
+AgriFeed is an agricultural quality analysis platform designed to help dairy farmers, feed mills, and livestock managers assess cattle feed and silage quality instantly using computer vision (Roboflow Google Gemini 3.1 Pro Workflow) and chemical parameter analysis.
 
 ---
 

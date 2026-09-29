@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icon.svg", "cattle_hero.jpg", "silage_hands.jpg"],
       manifest: {
-        name: "AgriFeed AI – Feed & Silage Quality",
-        short_name: "AgriFeed AI",
+        name: "AgriFeed – Feed & Silage Quality",
+        short_name: "AgriFeed",
         description:
           "AI-powered feed and silage quality assessment for dairy farmers. Works offline.",
         theme_color: "#1b5e20",

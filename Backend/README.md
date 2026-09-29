@@ -1,6 +1,6 @@
-# AgriFeed AI Backend
+# AgriFeed Backend
 
-Express REST API for the existing AgriFeed AI React frontend.
+Express REST API for the existing AgriFeed React frontend.
 
 ## Current scope
 

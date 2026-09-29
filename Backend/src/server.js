@@ -35,7 +35,7 @@ app.use(
 app.get(["/api/health", "/health"], (req, res) => {
   res.json({
     success: true,
-    message: "AgriFeed AI backend is running",
+    message: "AgriFeed backend is running",
     timestamp: new Date().toISOString(),
   });
 });
@@ -120,7 +120,7 @@ async function startServer() {
     }
 
     app.listen(PORT, () => {
-      console.log(`AgriFeed AI backend running on http://localhost:${PORT}`);
+      console.log(`AgriFeed backend running on http://localhost:${PORT}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error.message);

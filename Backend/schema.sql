@@ -1,4 +1,4 @@
--- AgriFeed AI PostgreSQL Schema Setup
+-- AgriFeed PostgreSQL Schema Setup
 
 -- 1. Create Users Table
 CREATE TABLE IF NOT EXISTS users (

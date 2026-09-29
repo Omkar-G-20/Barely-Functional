@@ -47,7 +47,7 @@ function Sidebar() {
                     <div className="brand-icon">
                         <Leaf size={18} />
                     </div>
-                    <span>Agri<strong>Feed</strong> AI</span>
+                    <span>Agri<strong>Feed</strong></span>
                 </div>
 
                 <div className="sidebar-menu">

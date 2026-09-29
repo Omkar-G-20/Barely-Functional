@@ -30,7 +30,7 @@ class ErrorBoundary extends React.Component {
           textAlign: "center"
         }}>
           <h2 style={{ fontSize: "24px", color: "#1b5e20", marginBottom: "1rem" }}>
-            AgriFeed AI
+            AgriFeed
           </h2>
           <p style={{ maxWidth: "480px", color: "#4b5563", marginBottom: "1.5rem" }}>
             An unexpected error occurred. Click below to reload the application.

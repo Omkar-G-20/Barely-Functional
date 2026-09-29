@@ -90,7 +90,7 @@ export function PWAInstallPrompt() {
 
                 <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: "0.95rem", marginBottom: "2px" }}>
-                        Install AgriFeed AI
+                        Install AgriFeed
                     </div>
                     <div style={{ fontSize: "0.78rem", opacity: 0.85 }}>
                         Add to home screen for offline access & fast launch

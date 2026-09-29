@@ -76,7 +76,7 @@ function LoginPage() {
 
                     <div className="af-auth-logo">
                         <div className="af-logo-icon"><Leaf size={18} /></div>
-                        <span>Agri<strong>Feed</strong> AI</span>
+                        <span>Agri<strong>Feed</strong></span>
                     </div>
 
                     {/* Language switcher */}

@@ -42,7 +42,7 @@ function AppHeader({ title, subtitle, label }) {
             {/* Mobile brand */}
             <div className="app-header-brand">
                 <div className="brand-icon"><Leaf size={16} /></div>
-                <span>Agri<strong>Feed</strong> AI</span>
+                <span>Agri<strong>Feed</strong></span>
             </div>
 
             {/* Page title (desktop) */}

@@ -15,7 +15,7 @@ function LandingPage() {
                     <div className="lp-brand-icon">
                         <Leaf size={18} />
                     </div>
-                    <span>Agri<strong>Feed</strong> AI</span>
+                    <span>Agri<strong>Feed</strong></span>
                 </Link>
 
                 <div className="lp-nav-links">
@@ -134,7 +134,7 @@ function LandingPage() {
             </section>
 
             <footer className="lp-footer">
-                <div>© 2026 AgriFeed AI</div>
+                <div>© 2026 AgriFeed</div>
                 <div>{t.footerRight}</div>
             </footer>
 
