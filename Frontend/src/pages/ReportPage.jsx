@@ -3,6 +3,7 @@ import { Download, FileText, Loader2, Trash2 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import AppHeader from "../components/AppHeader";
 import QualityBadge from "../components/QualityBadge";
+import ConfirmModal from "../components/ConfirmModal";
 import { api } from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -11,6 +12,9 @@ function ReportPage() {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [downloadingId, setDownloadingId] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState(null);
 
     useEffect(() => {
         let isMounted = true;
@@ -30,14 +34,24 @@ function ReportPage() {
         return () => { isMounted = false; };
     }, []);
 
-    const handleDeleteReport = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this report and its test record? This cannot be undone.")) return;
+    const handleDeleteReportClick = (id) => {
+        setDeleteTarget(id);
+        setDeleteError(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return;
+        setIsDeleting(true);
+        setDeleteError(null);
         try {
-            await api.deleteAnalysis(id);
-            setReports((prev) => prev.filter((r) => String(r.id) !== String(id) && String(r.testId) !== String(id)));
+            await api.deleteAnalysis(deleteTarget);
+            setReports((prev) => prev.filter((r) => String(r.id) !== String(deleteTarget) && String(r.testId) !== String(deleteTarget)));
+            setDeleteTarget(null);
         } catch (err) {
             console.error("Failed to delete report:", err);
-            alert(err.message || "Failed to delete report.");
+            setDeleteError(err.message || "Failed to delete report.");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -134,7 +148,7 @@ function ReportPage() {
                                         <button
                                             type="button"
                                             className="report-delete-btn"
-                                            onClick={() => handleDeleteReport(rep.id || rep.testId)}
+                                            onClick={() => handleDeleteReportClick(rep.id || rep.testId)}
                                             title="Delete this report"
                                             aria-label="Delete report"
                                         >
@@ -150,6 +164,23 @@ function ReportPage() {
                 </div>
 
             </main>
+
+            <ConfirmModal
+                isOpen={Boolean(deleteTarget)}
+                title="Delete Report?"
+                message="Are you sure you want to permanently delete this report and its test record? This cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                isDeleting={isDeleting}
+                error={deleteError}
+                onConfirm={handleConfirmDelete}
+                onCancel={() => {
+                    if (!isDeleting) {
+                        setDeleteTarget(null);
+                        setDeleteError(null);
+                    }
+                }}
+            />
 
         </div>
     );

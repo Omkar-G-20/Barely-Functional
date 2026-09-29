@@ -3,7 +3,8 @@ const path = require("path");
 const {
   createAnalysis,
   getAnalysisById,
-  getAnalysesByUser
+  getAnalysesByUser,
+  deleteAnalysis
 } = require("../repositories/memoryRepository");
 
 const { analyze } = require("../services/analysisService");

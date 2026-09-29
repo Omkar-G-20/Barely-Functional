@@ -10,6 +10,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import AppHeader from "../components/AppHeader";
 import QualityBadge from "../components/QualityBadge";
+import ConfirmModal from "../components/ConfirmModal";
 import { api } from "../services/api";
 
 function HistoryPage() {
@@ -17,6 +18,9 @@ function HistoryPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterQuality, setFilterQuality] = useState("ALL");
     const [loading, setLoading] = useState(true);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState(null);
 
     useEffect(() => {
         let isMounted = true;
@@ -36,15 +40,25 @@ function HistoryPage() {
         return () => { isMounted = false; };
     }, []);
 
-    const handleDelete = async (id, e) => {
+    const handleDeleteClick = (id, e) => {
         if (e) e.stopPropagation();
-        if (!window.confirm("Are you sure you want to delete this test analysis? This cannot be undone.")) return;
+        setDeleteTarget(id);
+        setDeleteError(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return;
+        setIsDeleting(true);
+        setDeleteError(null);
         try {
-            await api.deleteAnalysis(id);
-            setHistory((prev) => prev.filter((item) => String(item.id) !== String(id) && String(item.testId) !== String(id)));
+            await api.deleteAnalysis(deleteTarget);
+            setHistory((prev) => prev.filter((item) => String(item.id) !== String(deleteTarget) && String(item.testId) !== String(deleteTarget)));
+            setDeleteTarget(null);
         } catch (err) {
             console.error("Failed to delete analysis:", err);
-            alert(err.message || "Failed to delete test analysis.");
+            setDeleteError(err.message || "Failed to delete test analysis.");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -182,7 +196,7 @@ function HistoryPage() {
                                         </Link>
                                         <button
                                             type="button"
-                                            onClick={(e) => handleDelete(test.id || test.testId, e)}
+                                            onClick={(e) => handleDeleteClick(test.id || test.testId, e)}
                                             style={{
                                                 background: "#fff",
                                                 border: "1px solid #fecaca",
@@ -210,6 +224,23 @@ function HistoryPage() {
                 </div>
 
             </main>
+
+            <ConfirmModal
+                isOpen={Boolean(deleteTarget)}
+                title="Delete Test Analysis?"
+                message="Are you sure you want to permanently delete this test record? This cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                isDeleting={isDeleting}
+                error={deleteError}
+                onConfirm={handleConfirmDelete}
+                onCancel={() => {
+                    if (!isDeleting) {
+                        setDeleteTarget(null);
+                        setDeleteError(null);
+                    }
+                }}
+            />
 
         </div>
     );
