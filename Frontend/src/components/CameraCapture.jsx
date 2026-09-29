@@ -17,10 +17,20 @@ function CameraCapture({ onCapture, onClose }) {
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
 
+  const nativeInputRef = useRef(null);
+
   useEffect(() => {
     let cancelled = false;
 
     async function startCamera() {
+      // Check if getUserMedia is supported in the current browser/context
+      if (!navigator?.mediaDevices?.getUserMedia) {
+        setError(
+          "In-browser camera stream requires a secure (HTTPS) connection. Tap 'Use Device Camera' below to capture directly."
+        );
+        return;
+      }
+
       try {
         // Try rear camera first (mobile), fall back to any camera
         let stream;
@@ -50,7 +60,7 @@ function CameraCapture({ onCapture, onClose }) {
               ? "Camera access was denied. Please allow camera permission in your browser settings and try again."
               : err.name === "NotFoundError"
               ? "No camera was found on this device."
-              : "Could not open the camera: " + err.message
+              : "Could not open camera stream: " + err.message
           );
         }
       }
@@ -142,6 +152,21 @@ function CameraCapture({ onCapture, onClose }) {
         </div>
 
         <div className="cam-modal__actions">
+          <input
+            ref={nativeInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                onCapture(file);
+                onClose();
+              }
+            }}
+          />
+
           <button
             type="button"
             className="cam-modal__cancel"
@@ -150,7 +175,16 @@ function CameraCapture({ onCapture, onClose }) {
             Cancel
           </button>
 
-          {!error && (
+          {error ? (
+            <button
+              type="button"
+              className="cam-modal__capture"
+              onClick={() => nativeInputRef.current?.click()}
+            >
+              <Camera size={18} />
+              Open Device Camera
+            </button>
+          ) : (
             <button
               type="button"
               className="cam-modal__capture"

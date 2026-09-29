@@ -154,8 +154,31 @@ async function getOne(req, res) {
   });
 }
 
+async function remove(req, res) {
+  try {
+    const success = await deleteAnalysis(req.userId, req.params.id);
+    if (!success) {
+      return res.status(404).json({
+        success: false,
+        message: "Analysis record not found."
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Analysis deleted successfully."
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Failed to delete analysis."
+    });
+  }
+}
+
 module.exports = {
   createSampleAnalysis,
   history,
-  getOne
+  getOne,
+  remove
 };

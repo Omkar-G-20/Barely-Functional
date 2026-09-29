@@ -15,36 +15,50 @@ import AdvisoryPage from "./pages/AdvisoryPage";
 import HistoryPage from "./pages/HistoryPage";
 import ReportPage from "./pages/ReportPage";
 import ProfilePage from "./pages/ProfilePage";
+import { PWAInstallPrompt, OfflineIndicator } from "./components/PWAComponents";
+import MobileBottomNav from "./components/MobileBottomNav";
 
 function App() {
     return (
-        <Routes>
+        <>
+            {/* Offline status alert ribbon */}
+            <OfflineIndicator />
 
-            {/* Public Pages */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            {/* Core Application Routes */}
+            <Routes>
 
-            {/* Application */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/sample-selection" element={<SampleSelection />} />
+                {/* Public Pages */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
 
-            {/* Analysis */}
-            <Route path="/feed-analysis" element={<FeedAnalysis />} />
-            <Route path="/silage-analysis" element={<SilageAnalysis />} />
+                {/* Application */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/sample-selection" element={<SampleSelection />} />
 
-            {/* Results */}
-            <Route path="/result" element={<AnalysisResult />} />
-            <Route path="/advisory" element={<AdvisoryPage />} />
+                {/* Analysis */}
+                <Route path="/feed-analysis" element={<FeedAnalysis />} />
+                <Route path="/silage-analysis" element={<SilageAnalysis />} />
 
-            {/* Reports */}
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/report" element={<ReportPage />} />
+                {/* Results */}
+                <Route path="/result" element={<AnalysisResult />} />
+                <Route path="/advisory" element={<AdvisoryPage />} />
 
-            {/* User */}
-            <Route path="/profile" element={<ProfilePage />} />
+                {/* Reports */}
+                <Route path="/history" element={<HistoryPage />} />
+                <Route path="/report" element={<ReportPage />} />
 
-        </Routes>
+                {/* User */}
+                <Route path="/profile" element={<ProfilePage />} />
+
+            </Routes>
+
+            {/* Mobile Bottom Navigation (Native App Bar for phones & tablets) */}
+            <MobileBottomNav />
+
+            {/* PWA Add to Home Screen Prompt & iOS instructions */}
+            <PWAInstallPrompt />
+        </>
     );
 }
 

@@ -531,17 +531,34 @@ async function getDashboardStats(userId) {
   };
 }
 
-async function deleteAnalysis(analysisId) {
+async function deleteAnalysis(userId, analysisId) {
   const pool = getPool();
+  const idStr = String(analysisId);
+  const userStr = userId ? String(userId) : null;
+
   if (pool) {
-    await pool.query("DELETE FROM analyses WHERE id::text = $1", [String(analysisId)]);
-    return;
+    if (userStr) {
+      await pool.query(
+        "DELETE FROM analyses WHERE (id::text = $1 OR test_id = $1) AND user_id::text = $2",
+        [idStr, userStr]
+      );
+    } else {
+      await pool.query("DELETE FROM analyses WHERE id::text = $1 OR test_id = $1", [idStr]);
+    }
+    return true;
   }
 
-  const index = memoryAnalyses.findIndex((a) => String(a.id) === String(analysisId));
+  const index = memoryAnalyses.findIndex((a) => {
+    const idMatch = String(a.id) === idStr || String(a.testId) === idStr;
+    const userMatch = userStr ? String(a.userId) === userStr : true;
+    return idMatch && userMatch;
+  });
+
   if (index !== -1) {
     memoryAnalyses.splice(index, 1);
+    return true;
   }
+  return false;
 }
 
 module.exports = {

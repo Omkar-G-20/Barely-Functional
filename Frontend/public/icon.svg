@@ -1,0 +1,14 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'>
+  <rect width='512' height='512' rx='80' fill='#1b5e20'/>
+  <circle cx='256' cy='256' r='175' fill='#2e7d32' opacity='0.5'/>
+  <path d='M256 95 C175 138 138 202 148 285 C158 355 220 398 256 408 C292 398 354 355 364 285 C374 202 337 138 256 95Z' fill='#4caf50'/>
+  <path d='M256 95 L256 408' stroke='#1b5e20' stroke-width='9' stroke-linecap='round'/>
+  <path d='M256 195 C228 185 208 192 197 208' stroke='#1b5e20' stroke-width='6' stroke-linecap='round' fill='none'/>
+  <path d='M256 248 C227 237 203 246 192 264' stroke='#1b5e20' stroke-width='6' stroke-linecap='round' fill='none'/>
+  <path d='M256 300 C227 289 204 299 196 318' stroke='#1b5e20' stroke-width='6' stroke-linecap='round' fill='none'/>
+  <circle cx='342' cy='158' r='20' fill='#81c784'/>
+  <circle cx='374' cy='198' r='13' fill='#a5d6a7'/>
+  <circle cx='312' cy='132' r='11' fill='#a5d6a7'/>
+  <line x1='342' y1='158' x2='374' y2='198' stroke='#81c784' stroke-width='4'/>
+  <line x1='342' y1='158' x2='312' y2='132' stroke='#81c784' stroke-width='4'/>
+</svg>

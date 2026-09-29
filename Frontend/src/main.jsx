@@ -12,6 +12,25 @@ import "./styles/landing.css";
 import "./styles/auth.css";
 import "./styles/responsive.css";
 
+// Register PWA service worker for offline support and mobile install
+if ("serviceWorker" in navigator) {
+  import("virtual:pwa-register")
+    .then(({ registerSW }) => {
+      registerSW({
+        immediate: true,
+        onNeedRefresh() {
+          console.log("[PWA] New content available");
+        },
+        onOfflineReady() {
+          console.log("[PWA] App is ready for offline usage");
+        },
+      });
+    })
+    .catch((err) => {
+      console.log("[PWA] Service worker registration note:", err?.message || err);
+    });
+}
+
 ReactDOM.createRoot(
   document.getElementById("root")
 ).render(

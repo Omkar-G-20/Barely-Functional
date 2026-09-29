@@ -88,9 +88,11 @@ function ProfilePage() {
             <main className="dashboard-main">
 
                 <div className="page-heading">
-                    <span>{t.accountLabel}</span>
-                    <h1>{t.myProfile}</h1>
-                    <p>{t.profileSubtitle}</p>
+                    <div>
+                        <span>{t.accountLabel}</span>
+                        <h1>{t.myProfile}</h1>
+                        <p>{t.profileSubtitle}</p>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -192,18 +194,20 @@ function ProfilePage() {
                         <div style={{ marginTop: "2.5rem" }}>
 
                             <div className="page-heading" style={{ marginBottom: "1rem", paddingBottom: 0 }}>
-                                <span>{t.settingsSection.toUpperCase()}</span>
-                                <h2 style={{ fontSize: "1.4rem", marginBottom: "0.25rem" }}>
-                                    {t.settingsSection}
-                                </h2>
+                                <div>
+                                    <span>{t.settingsSection.toUpperCase()}</span>
+                                    <h2 style={{ fontSize: "1.4rem", margin: "4px 0 0 0" }}>
+                                        {t.settingsSection}
+                                    </h2>
+                                </div>
                             </div>
 
                             <div className="settings-card">
 
                                 {/* ── Language Row ── */}
-                                <div className="setting-row" style={{ alignItems: "flex-start", gap: "1.5rem" }}>
+                                <div className="setting-row setting-row--responsive">
 
-                                    <div style={{ flex: 1 }}>
+                                    <div className="setting-row-text">
                                         <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                             <Globe size={18} color="var(--color-primary, #1b5e20)" />
                                             {t.languageSection}
@@ -212,12 +216,7 @@ function ProfilePage() {
                                     </div>
 
                                     {/* Language cards grid */}
-                                    <div style={{
-                                        display: "grid",
-                                        gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "0.6rem",
-                                        minWidth: "260px"
-                                    }}>
+                                    <div className="language-grid-responsive">
                                         {LANGUAGES.map((lang) => {
                                             const isActive = language === lang.value;
                                             return (

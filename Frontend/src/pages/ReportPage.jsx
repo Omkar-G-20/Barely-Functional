@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Download, FileText, Loader2 } from "lucide-react";
+import { Download, FileText, Loader2, Trash2 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import AppHeader from "../components/AppHeader";
 import QualityBadge from "../components/QualityBadge";
@@ -29,6 +29,17 @@ function ReportPage() {
         fetchReports();
         return () => { isMounted = false; };
     }, []);
+
+    const handleDeleteReport = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this report and its test record? This cannot be undone.")) return;
+        try {
+            await api.deleteAnalysis(id);
+            setReports((prev) => prev.filter((r) => String(r.id) !== String(id) && String(r.testId) !== String(id)));
+        } catch (err) {
+            console.error("Failed to delete report:", err);
+            alert(err.message || "Failed to delete report.");
+        }
+    };
 
     const handleDownloadPDF = async (report) => {
         setDownloadingId(report.id);
@@ -92,31 +103,44 @@ function ReportPage() {
                             return (
                                 <div className="report-item" key={rep.id}>
 
-                                    <div className="report-icon">
-                                        <FileText />
-                                    </div>
-
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                            <h3>{reportTitle}</h3>
-                                            <QualityBadge status={rep.quality || "GOOD"} />
+                                    <div className="report-item-header">
+                                        <div className="report-icon">
+                                            <FileText size={22} />
                                         </div>
-                                        <p>
-                                            {t.testId}: {rep.testId || rep.id} • {formattedDate}
-                                        </p>
+
+                                        <div className="report-item-info">
+                                            <div className="report-item-title-row">
+                                                <h3>{reportTitle}</h3>
+                                                <QualityBadge status={rep.quality || "GOOD"} />
+                                            </div>
+                                            <p className="report-item-subtitle">
+                                                {t.testId}: <strong>{rep.testId || rep.id}</strong> • {formattedDate}
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <button
-                                        className="secondary-button"
-                                        onClick={() => handleDownloadPDF(rep)}
-                                        disabled={downloadingId === rep.id}
-                                    >
-                                        {downloadingId === rep.id ? (
-                                            <><Loader2 size={16} className="spin" /> {t.generatingPDF}</>
-                                        ) : (
-                                            <><Download size={17} /> {t.downloadPDF}</>
-                                        )}
-                                    </button>
+                                    <div className="report-item-actions">
+                                        <button
+                                            className="secondary-button report-download-btn"
+                                            onClick={() => handleDownloadPDF(rep)}
+                                            disabled={downloadingId === rep.id}
+                                        >
+                                            {downloadingId === rep.id ? (
+                                                <><Loader2 size={16} className="spin" /> {t.generatingPDF}</>
+                                            ) : (
+                                                <><Download size={16} /> {t.downloadPDF}</>
+                                            )}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="report-delete-btn"
+                                            onClick={() => handleDeleteReport(rep.id || rep.testId)}
+                                            title="Delete this report"
+                                            aria-label="Delete report"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
 
                                 </div>
                             );

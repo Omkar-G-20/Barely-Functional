@@ -12,6 +12,7 @@ function FeedAnalysis() {
     const navigate = useNavigate();
     const { t } = useLanguage();
     const fileInputRef = useRef(null);
+    const cameraInputRef = useRef(null);
 
     const [imagePreview, setImagePreview] = useState(null);
     const [imageFile, setImageFile] = useState(null);
@@ -23,6 +24,17 @@ function FeedAnalysis() {
     const [data, setData] = useState({
         moisture: "", protein: "", fiber: "", aflatoxin: "", ph: ""
     });
+
+    const handleCameraClick = () => {
+        // If on mobile device or mediaDevices is not available (e.g. HTTP on local network),
+        // trigger native device camera directly for full reliability and high quality
+        const isMobile = /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
+        if (isMobile || !navigator?.mediaDevices?.getUserMedia) {
+            cameraInputRef.current?.click();
+        } else {
+            setShowCamera(true);
+        }
+    };
 
     const handleImage = async (e) => {
         const file = e.target.files?.[0];
@@ -119,6 +131,7 @@ function FeedAnalysis() {
                                 </>
                             )}
                             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImage} hidden />
+                            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleImage} style={{ display: "none" }} />
                         </label>
 
                         {showImageError && (
@@ -139,7 +152,7 @@ function FeedAnalysis() {
                                 <button type="button" className="camera-button" onClick={() => fileInputRef.current?.click()}>
                                     <Upload size={17} /> {t.chooseImageFile}
                                 </button>
-                                <button type="button" className="camera-button camera-button--capture" onClick={() => setShowCamera(true)}>
+                                <button type="button" className="camera-button camera-button--capture" onClick={handleCameraClick}>
                                     <Camera size={17} /> {t.useCamera}
                                 </button>
                             </div>

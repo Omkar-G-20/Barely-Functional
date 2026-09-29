@@ -225,13 +225,24 @@ button {
     padding-top: calc(64px + 35px);
 }
 
-.dashboard-header,
-.page-heading {
+.dashboard-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     margin-bottom: 30px;
+}
+
+.page-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.page-heading > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .dashboard-label,
@@ -1746,46 +1757,112 @@ button {
 
 .report-item {
     display: flex;
-    align-items: center;
-    gap: 15px;
-
-    padding: 17px;
-
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
     background: white;
-
     border: 1px solid var(--border);
     border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.report-item-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
 }
 
 .report-icon {
-    width: 45px;
-    height: 45px;
-
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    border-radius: 10px;
-
+    border-radius: 12px;
     background: var(--primary-light);
-
     color: var(--primary);
+    flex-shrink: 0;
 }
 
-.report-item>div:nth-child(2) {
+.report-item-info {
     flex: 1;
+    min-width: 0;
 }
 
-.report-item h3 {
+.report-item-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.report-item-title-row h3 {
+    margin: 0;
     color: var(--dark);
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 700;
 }
 
-.report-item p {
-    margin-top: 4px;
-
+.report-item-subtitle {
+    margin: 0;
     color: var(--muted);
-    font-size: 11px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.report-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.report-download-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.report-delete-btn {
+    background: #fff;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.report-delete-btn:hover {
+    background: #fef2f2;
+}
+
+@media (min-width: 769px) {
+    .report-item {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .report-item-header {
+        flex: 1;
+        align-items: center;
+    }
+    .report-item-actions {
+        width: auto;
+    }
+    .report-download-btn {
+        flex: initial;
+    }
 }
 
 /* PROFILE */

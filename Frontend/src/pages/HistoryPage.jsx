@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import {
     Search,
     Filter,
-    Loader2
+    Loader2,
+    Trash2
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
@@ -34,6 +35,18 @@ function HistoryPage() {
         fetchHistory();
         return () => { isMounted = false; };
     }, []);
+
+    const handleDelete = async (id, e) => {
+        if (e) e.stopPropagation();
+        if (!window.confirm("Are you sure you want to delete this test analysis? This cannot be undone.")) return;
+        try {
+            await api.deleteAnalysis(id);
+            setHistory((prev) => prev.filter((item) => String(item.id) !== String(id) && String(item.testId) !== String(id)));
+        } catch (err) {
+            console.error("Failed to delete analysis:", err);
+            alert(err.message || "Failed to delete test analysis.");
+        }
+    };
 
     const filtered = history.filter((test) => {
         const matchesSearch =
@@ -159,13 +172,35 @@ function HistoryPage() {
                                         status={test.quality || "GOOD"}
                                     />
 
-                                    <Link
-                                        to={`/result?id=${test.id}`}
-                                        className="table-action"
-                                        style={{ textDecoration: "none", textAlign: "center" }}
-                                    >
-                                        View
-                                    </Link>
+                                    <div style={{ display: "flex", gap: "6px", alignItems: "center", justifyContent: "flex-end" }}>
+                                        <Link
+                                            to={`/result?id=${test.id}`}
+                                            className="table-action"
+                                            style={{ textDecoration: "none", textAlign: "center" }}
+                                        >
+                                            View
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleDelete(test.id || test.testId, e)}
+                                            style={{
+                                                background: "#fff",
+                                                border: "1px solid #fecaca",
+                                                color: "#dc2626",
+                                                borderRadius: "6px",
+                                                padding: "6px 8px",
+                                                cursor: "pointer",
+                                                display: "inline-flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                transition: "all 0.15s"
+                                            }}
+                                            title="Delete test analysis"
+                                            aria-label="Delete test analysis"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
 
                                 </div>
                             );

@@ -4,7 +4,8 @@ const router = express.Router();
 const {
   createSampleAnalysis,
   history,
-  getOne
+  getOne,
+  remove
 } = require("../controllers/analysisController");
 
 const { requireAuth } = require("../middleware/authMiddleware");
@@ -25,5 +26,6 @@ router.post("/silage", upload.single("image"), (req, res) => {
 
 router.get("/history", history);
 router.get("/:id", getOne);
+router.delete("/:id", remove);
 
 module.exports = router;

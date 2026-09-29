@@ -197,6 +197,12 @@ export const api = {
     return request(`/api/analysis/${id}`);
   },
 
+  async deleteAnalysis(id) {
+    return request(`/api/analysis/${id}`, {
+      method: "DELETE",
+    });
+  },
+
   // Profile
   async getProfile() {
     return request("/api/profile");
