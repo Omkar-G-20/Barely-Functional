@@ -287,7 +287,7 @@ function generateAnalysisPDF(analysis, dataStream, langParam = "English") {
   const t = PDF_TRANSLATIONS[lang] || PDF_TRANSLATIONS.English;
   const isIndic = lang !== "English";
 
-  const doc = new PDFDocument({ margin: 40, size: "A4" });
+  const doc = new PDFDocument({ margin: 40, size: "A4", autoFirstPage: true });
   doc.pipe(dataStream);
 
   const unicodeFont = getUnicodeFontPath();
@@ -368,43 +368,56 @@ function generateAnalysisPDF(analysis, dataStream, langParam = "English") {
 
   const targetImage = analysis.annotatedImagePath || analysis.imagePath;
   const localImg = resolveLocalImage(targetImage);
-  const cardHeight = localImg ? 160 : 70;
+  // Card must always fit: heading(18) + model(14) + anomalies-count(14) + 3 bullets(42) + desc(22) + padding(16) = ~126
+  const cardHeight = localImg ? 200 : 130;
 
   doc.rect(40, currentY, contentWidth, cardHeight).fillAndStroke("#fafafa", "#e0e0e0");
 
-  const textWidth = localImg ? contentWidth - 230 : contentWidth - 30;
+  const textWidth = localImg ? contentWidth - 235 : contentWidth - 30;
 
   const aiObj = analysis.aiAnalysis;
   const counts = aiObj?.counts || { mould: 0, discoloration: 0, foreign_material: 0 };
   const totalDetections = (counts.mould || 0) + (counts.discoloration || 0) + (counts.foreign_material || 0);
 
   const headingText = isIndic
-    ? (totalDetections > 0 ? `${t.markedAnomalies}: ${totalDetections}` : (isFeed ? t.cattleFeed : t.silage))
-    : (analysis.aiResult || `Visual Screening Status`);
+    ? (totalDetections > 0 ? `${t.markedAnomalies}: ${totalDetections} ${t.total}` : (isFeed ? t.cattleFeed : t.silage))
+    : (analysis.aiResult || (totalDetections === 0 ? "No Visible Defects Detected (Good)" : `Visual Screening: ${totalDetections} Anomalies Found`));
+
+  // AI Card inner content — fixed Y offsets relative to card top
+  const cardInnerX = 55;
+  const cardTextW = textWidth - 10;
 
   doc
     .fillColor("#1b5e20")
     .fontSize(10.5)
     .font(fontBold)
-    .text(headingText, 55, currentY + 12, { width: textWidth });
+    .text(headingText, cardInnerX, currentY + 12, { width: cardTextW, lineBreak: false });
 
   doc
     .fillColor("#555555")
     .fontSize(8.5)
     .font(fontRegular)
-    .text(t.workflowModel, 55, currentY + 28)
-    .text(`${t.markedAnomalies}: ${totalDetections} ${t.total}`, 55, currentY + 42);
+    .text(t.workflowModel, cardInnerX, currentY + 30, { width: cardTextW, lineBreak: false })
+    .text(`${t.markedAnomalies}: ${totalDetections} ${t.total}`, cardInnerX, currentY + 44, { width: cardTextW, lineBreak: false });
 
-  // Anomaly counts line
+  // Anomaly bullet rows — each on its own fixed Y line
   doc
     .fillColor(counts.mould > 0 ? "#c62828" : "#2e7d32")
     .font(fontBold)
     .fontSize(8.5)
-    .text(`• ${t.mould}: ${counts.mould}`, 55, currentY + 58)
+    .text(`• ${t.mould}: ${counts.mould}`, cardInnerX, currentY + 60, { width: cardTextW, lineBreak: false });
+
+  doc
     .fillColor(counts.discoloration > 0 ? "#e65100" : "#2e7d32")
-    .text(`• ${t.discoloration}: ${counts.discoloration}`, 55, currentY + 72)
+    .font(fontBold)
+    .fontSize(8.5)
+    .text(`• ${t.discoloration}: ${counts.discoloration}`, cardInnerX, currentY + 76, { width: cardTextW, lineBreak: false });
+
+  doc
     .fillColor(counts.foreign_material > 0 ? "#c62828" : "#2e7d32")
-    .text(`• ${t.foreignMaterial}: ${counts.foreign_material}`, 55, currentY + 86);
+    .font(fontBold)
+    .fontSize(8.5)
+    .text(`• ${t.foreignMaterial}: ${counts.foreign_material}`, cardInnerX, currentY + 92, { width: cardTextW, lineBreak: false });
 
   doc
     .fillColor("#666666")
@@ -412,9 +425,9 @@ function generateAnalysisPDF(analysis, dataStream, langParam = "English") {
     .fontSize(8)
     .text(
       t.visualBoxDesc,
-      55,
-      currentY + 106,
-      { width: textWidth }
+      cardInnerX,
+      currentY + 110,
+      { width: cardTextW }
     );
 
   // Embed Image if present
@@ -487,57 +500,82 @@ function generateAnalysisPDF(analysis, dataStream, langParam = "English") {
     });
   }
 
-  // Draw table header
-  doc.rect(40, currentY, contentWidth, 22).fill("#2e7d32");
-  doc.fillColor("#ffffff").font(fontBold).fontSize(8.5);
-  doc.text(t.colParam, 50, currentY + 6);
-  doc.text(t.colReading, 210, currentY + 6);
-  doc.text(t.colNorm, 330, currentY + 6);
-  doc.text(t.colStatus, 455, currentY + 6);
+  // Column X positions and widths — carefully sized to prevent overflow
+  const COL_PARAM_X   = 50;   const COL_PARAM_W   = 155;
+  const COL_VALUE_X   = 210;  const COL_VALUE_W   = 115;
+  const COL_NORM_X    = 330;  const COL_NORM_W    = 120;
+  const COL_STATUS_X  = 455;  const COL_STATUS_W  = 80;
+  const ROW_H = 22;
 
-  currentY += 22;
+  // Draw table header
+  doc.rect(40, currentY, contentWidth, ROW_H).fill("#2e7d32");
+  doc.fillColor("#ffffff").font(fontBold).fontSize(8.5);
+  doc.text(t.colParam,   COL_PARAM_X,  currentY + 7, { width: COL_PARAM_W,  lineBreak: false });
+  doc.text(t.colReading, COL_VALUE_X,  currentY + 7, { width: COL_VALUE_W,  lineBreak: false });
+  doc.text(t.colNorm,    COL_NORM_X,   currentY + 7, { width: COL_NORM_W,   lineBreak: false });
+  doc.text(t.colStatus,  COL_STATUS_X, currentY + 7, { width: COL_STATUS_W, lineBreak: false });
+
+  currentY += ROW_H;
 
   mList.forEach((row, i) => {
     const bg = i % 2 === 0 ? "#f9fbe7" : "#ffffff";
-    doc.rect(40, currentY, contentWidth, 20).fillAndStroke(bg, "#eeeeee");
+    doc.rect(40, currentY, contentWidth, ROW_H).fillAndStroke(bg, "#eeeeee");
+
     doc.fillColor("#333333").font(fontRegular).fontSize(8);
-    doc.text(row.label, 50, currentY + 5);
-    doc.font(fontBold).text(row.value, 210, currentY + 5);
-    doc.font(fontRegular).fillColor("#666666").text(row.norm, 330, currentY + 5);
+    doc.text(row.label, COL_PARAM_X, currentY + 7, { width: COL_PARAM_W, lineBreak: false });
+
+    doc.font(fontBold).fillColor("#222222");
+    doc.text(row.value, COL_VALUE_X, currentY + 7, { width: COL_VALUE_W, lineBreak: false });
+
+    doc.font(fontRegular).fillColor("#555555");
+    doc.text(row.norm, COL_NORM_X, currentY + 7, { width: COL_NORM_W, lineBreak: false });
 
     const isWarn = row.status.includes("WARNING") || row.status.includes("चेतावनी") || row.status.includes("इशारा") || row.status.includes("ಎಚ್ಚರಿಕೆ") || row.status.includes("High") || row.status.includes("Heating");
-    doc.font(fontBold).fillColor(isWarn ? "#c62828" : "#2e7d32").text(row.status, 455, currentY + 5);
+    doc.font(fontBold).fillColor(isWarn ? "#c62828" : "#2e7d32");
+    doc.text(row.status, COL_STATUS_X, currentY + 7, { width: COL_STATUS_W, lineBreak: false });
 
-    currentY += 20;
+    currentY += ROW_H;
   });
 
   // 5. ACTIONABLE RECOMMENDATIONS & FARMER ADVISORY
-  currentY += 18;
+  currentY += 22;
   doc
     .fillColor("#1b5e20")
     .fontSize(11.5)
     .font(fontBold)
     .text(t.section3, 40, currentY);
 
-  currentY += 18;
+  currentY += 20;
   const rawRecs = analysis.recommendations || [];
   const recs = rawRecs.length > 0 ? rawRecs : [
-    "Store feed in a clean, dry, and well-ventilated storage facility.",
-    "Perform regular batch inspections to maintain feed quality."
+    "This does not confirm nutritional composition, toxins, or laboratory safety.",
+    "Store feed in a clean, dry, well-ventilated storage facility.",
+    "Perform regular batch inspections before feeding."
   ];
 
   const dict = REC_MAP[lang] || {};
+  const recTextX = 68;
+  const recTextW = contentWidth - 38;
 
   recs.forEach((rec) => {
     const translatedRec = dict[rec] || rec;
-    doc.fillColor("#2e7d32").font(fontBold).fontSize(9).text(`✔ `, 45, currentY);
+    const lineH = doc.heightOfString(translatedRec, { width: recTextW, font: fontRegular, fontSize: 8.5 }) + 8;
+
+    // Bullet tick
+    doc
+      .fillColor("#2e7d32")
+      .font(fontBold)
+      .fontSize(9)
+      .text("•", 50, currentY + 1, { lineBreak: false });
+
+    // Recommendation text — starts after bullet, never overlaps
     doc
       .fillColor("#333333")
       .font(fontRegular)
       .fontSize(8.5)
-      .text(translatedRec, 60, currentY, { width: contentWidth - 30 });
+      .text(translatedRec, recTextX, currentY, { width: recTextW });
 
-    currentY += doc.heightOfString(translatedRec, { width: contentWidth - 30 }) + 6;
+    currentY += lineH;
   });
 
   // 6. FOOTER DISCLAIMER
