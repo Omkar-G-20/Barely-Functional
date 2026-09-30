@@ -6,7 +6,10 @@ let isConnected = false;
 // Enable pool if PostgreSQL connection string or credentials are provided
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
-if (connectionString) {
+if (process.env.USE_POSTGRES === "false") {
+  console.warn("PostgreSQL explicitly disabled via USE_POSTGRES. Using memory fallback instantly.");
+  pool = null;
+} else if (connectionString) {
   const isSsl = connectionString.includes("sslmode=") || !connectionString.includes("localhost");
   pool = new Pool({
     connectionString,
