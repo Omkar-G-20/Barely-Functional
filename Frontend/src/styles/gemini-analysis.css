@@ -294,15 +294,15 @@
 }
 
 .count-card.mould {
-  border-top: 5px solid #9366c8;
+  border-top: 5px solid #ef4444;
 }
 
 .count-card.discoloration {
-  border-top: 5px solid #e19a2d;
+  border-top: 5px solid #f97316;
 }
 
 .count-card.foreign {
-  border-top: 5px solid #d45353;
+  border-top: 5px solid #eab308;
 }
 
 .count-card.total {
@@ -378,18 +378,18 @@
 }
 
 .prediction-class.mould {
-  background: #eee4fa;
-  color: #623893;
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .prediction-class.discoloration {
-  background: #fff0d4;
-  color: #87570e;
+  background: #ffedd5;
+  color: #ea580c;
 }
 
 .prediction-class.foreign_material {
-  background: #ffe4e4;
-  color: #992e2e;
+  background: #fef08a;
+  color: #a16207;
 }
 
 .gemini-results__empty {
