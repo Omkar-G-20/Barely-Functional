@@ -386,12 +386,12 @@ async function detectWithGeminiDirect({ imageBuffer, mimeType, fileName }) {
         let x = 50, y = 50, width = 100, height = 100;
         if (Array.isArray(p.box_2d) && p.box_2d.length === 4) {
           const [ymin, xmin, ymax, xmax] = p.box_2d;
-          // Normalise 0-1000 or 0-1 to pixel-relative coords
+          // Normalise 0-1000 or 0-1 to 0-1 (normalized coords)
           const scale = Math.max(ymin, xmin, ymax, xmax) > 1 ? 1000 : 1;
-          const top = (ymin / scale) * 400;
-          const left = (xmin / scale) * 400;
-          const h = Math.max(10, ((ymax - ymin) / scale) * 400);
-          const w = Math.max(10, ((xmax - xmin) / scale) * 400);
+          const top = ymin / scale;
+          const left = xmin / scale;
+          const h = Math.max(0.01, (ymax - ymin) / scale);
+          const w = Math.max(0.01, (xmax - xmin) / scale);
           x = left + w / 2;
           y = top + h / 2;
           width = w;

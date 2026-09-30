@@ -2,18 +2,18 @@ import React, { useState, useRef, useEffect } from "react";
 
 const CLASS_COLORS = {
   mould: {
-    border: "#a855f7",
-    bg: "#a855f7",
-    text: "#ffffff",
-  },
-  discoloration: {
     border: "#ef4444",
     bg: "#ef4444",
     text: "#ffffff",
   },
+  discoloration: {
+    border: "#f97316",
+    bg: "#f97316",
+    text: "#ffffff",
+  },
   foreign_material: {
-    border: "#f472b6",
-    bg: "#f472b6",
+    border: "#eab308",
+    bg: "#eab308",
     text: "#ffffff",
   },
   default: {
@@ -153,21 +153,16 @@ export default function AnnotatedSampleImage({
             {predictions.map((p, idx) => {
               const colorInfo = CLASS_COLORS[p.class] || CLASS_COLORS.default;
               
-              // Roboflow coordinates are typically center (x, y) or top-left in pixels
               const natW = naturalDimensions.width;
               const natH = naturalDimensions.height;
-
-              // Check if x, y is center or top-left
-              let leftPercent = (p.x / natW) * 100;
-              let topPercent = (p.y / natH) * 100;
-              let widthPercent = (p.width / natW) * 100;
-              let heightPercent = (p.height / natH) * 100;
-
-              // If x, y is center (standard in Roboflow):
-              if (p.x + p.width / 2 <= natW * 1.05 && p.x - p.width / 2 >= -natW * 0.05) {
-                leftPercent = ((p.x - p.width / 2) / natW) * 100;
-                topPercent = ((p.y - p.height / 2) / natH) * 100;
-              }
+              const isNormalized = p.width <= 1.05 && p.height <= 1.05 && p.x <= 1.05 && p.y <= 1.05;
+              const effW = isNormalized ? 1 : natW;
+              const effH = isNormalized ? 1 : natH;
+              
+              let leftPercent = ((p.x - p.width / 2) / effW) * 100;
+              let topPercent = ((p.y - p.height / 2) / effH) * 100;
+              let widthPercent = (p.width / effW) * 100;
+              let heightPercent = (p.height / effH) * 100;
 
               const labelText = `${p.class} ${(p.confidence !== null ? p.confidence : 1.0).toFixed(2)}`;
 

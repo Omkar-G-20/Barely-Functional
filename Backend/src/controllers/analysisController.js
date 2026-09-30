@@ -123,7 +123,7 @@ async function createSampleAnalysis(req, res) {
       sampleType,
       imagePath: resolvedImagePath,
       annotatedImagePath: annotatedImagePath || aiAnalysis?.annotatedImagePath || null,
-      outputImageDataUrl: aiAnalysis?.outputImageDataUrl || imageBase64DataUrl || null,
+      outputImageDataUrl: aiAnalysis?.outputImageDataUrl || null,
       aiAnalysis,
       measurements,
       ...result
