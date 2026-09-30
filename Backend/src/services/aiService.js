@@ -230,10 +230,8 @@ async function validateImageIsFeedOrSilage(imageBuffer, mimeType, sampleType = "
   ].join("\n");
 
   const modelsToTry = [
-    "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-flash-latest",
-    "gemini-3.1-pro-preview"
+    "gemini-1.5-flash",
+    "gemini-1.5-pro"
   ];
 
   for (const model of modelsToTry) {
@@ -334,10 +332,8 @@ async function detectWithGeminiDirect({ imageBuffer, mimeType, fileName }) {
   ].join("\n");
 
   const modelsToTry = [
-    "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-flash-latest",
-    "gemini-3.1-pro-preview"
+    "gemini-1.5-flash",
+    "gemini-1.5-pro"
   ];
 
   for (const model of modelsToTry) {
