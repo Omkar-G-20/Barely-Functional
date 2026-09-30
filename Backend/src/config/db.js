@@ -18,20 +18,27 @@ if (connectionString) {
     console.warn("PostgreSQL client pool error:", error.message);
   });
 } else if (process.env.USE_POSTGRES === "true" || (process.env.DB_PASSWORD && process.env.USE_POSTGRES !== "false")) {
-  const isRemote = process.env.DB_HOST && !["localhost", "127.0.0.1"].includes(process.env.DB_HOST);
-  pool = new Pool({
-    host: process.env.DB_HOST || "localhost",
-    port: Number(process.env.DB_PORT || 5432),
-    database: process.env.DB_NAME || "AgriFeed",
-    user: process.env.DB_USER || "postgres",
-    password: process.env.DB_PASSWORD,
-    ssl: isRemote ? { rejectUnauthorized: false } : false,
-    connectionTimeoutMillis: 5000,
-  });
+  const host = process.env.DB_HOST || "localhost";
+  const isRemote = host && !["localhost", "127.0.0.1"].includes(host);
+  
+  if (process.env.VERCEL && !isRemote) {
+    console.warn("Skipping PostgreSQL pool creation on Vercel (host is localhost). Using memory fallback instantly.");
+    pool = null;
+  } else {
+    pool = new Pool({
+      host,
+      port: Number(process.env.DB_PORT || 5432),
+      database: process.env.DB_NAME || "AgriFeed",
+      user: process.env.DB_USER || "postgres",
+      password: process.env.DB_PASSWORD,
+      ssl: isRemote ? { rejectUnauthorized: false } : false,
+      connectionTimeoutMillis: isRemote ? 5000 : 1500,
+    });
 
-  pool.on("error", (error) => {
-    console.warn("PostgreSQL client pool error:", error.message);
-  });
+    pool.on("error", (error) => {
+      console.warn("PostgreSQL client pool error:", error.message);
+    });
+  }
 }
 
 async function testConnection() {
@@ -41,7 +48,7 @@ async function testConnection() {
     isConnected = Boolean(result.rows[0]);
     return isConnected;
   } catch (err) {
-    console.warn("PostgreSQL connection attempt failed:", err.message);
+    console.warn("PostgreSQL connection attempt failed (using in-memory fallback):", err.message);
     isConnected = false;
     return false;
   }
