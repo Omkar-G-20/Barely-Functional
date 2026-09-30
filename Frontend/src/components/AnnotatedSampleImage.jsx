@@ -30,20 +30,24 @@ export default function AnnotatedSampleImage({
 }) {
   const [naturalDimensions, setNaturalDimensions] = useState({ width: 0, height: 0 });
   const [showAnnotated, setShowAnnotated] = useState(true);
+  const [imgError, setImgError] = useState(false);
   const imgRef = useRef(null);
 
-  const hasAnnotatedSrc = Boolean(annotatedImageSrc);
+  const bestAnnotated = annotatedImageSrc;
+  const bestOriginal = imageSrc || annotatedImageSrc;
+
+  const hasAnnotatedSrc = Boolean(bestAnnotated);
   const hasPredictions = Array.isArray(predictions) && predictions.length > 0;
 
   const handleImageLoad = (e) => {
+    setImgError(false);
     setNaturalDimensions({
       width: e.target.naturalWidth || 1,
       height: e.target.naturalHeight || 1,
     });
   };
 
-  // If backend provided a ready annotated image from Roboflow, and user selected annotated mode:
-  const displaySrc = (hasAnnotatedSrc && showAnnotated) ? annotatedImageSrc : imageSrc;
+  const displaySrc = (hasAnnotatedSrc && showAnnotated) ? bestAnnotated : bestOriginal;
   const isDirectAnnotated = (hasAnnotatedSrc && showAnnotated);
 
   return (
@@ -59,7 +63,7 @@ export default function AnnotatedSampleImage({
           <div style={{ display: "flex", gap: "6px" }}>
             <button
               type="button"
-              onClick={() => setShowAnnotated(true)}
+              onClick={() => { setShowAnnotated(true); setImgError(false); }}
               style={{
                 fontSize: "11px",
                 fontWeight: "600",
@@ -75,7 +79,7 @@ export default function AnnotatedSampleImage({
             </button>
             <button
               type="button"
-              onClick={() => setShowAnnotated(false)}
+              onClick={() => { setShowAnnotated(false); setImgError(false); }}
               style={{
                 fontSize: "11px",
                 fontWeight: "600",
@@ -105,20 +109,34 @@ export default function AnnotatedSampleImage({
           justifyContent: "center",
           alignItems: "center",
           border: "1px solid #e2e8f0",
+          minHeight: "180px",
         }}
       >
-        <img
-          ref={imgRef}
-          src={displaySrc}
-          alt="Sample analysis"
-          onLoad={handleImageLoad}
-          style={{
-            maxWidth: "100%",
-            maxHeight: "320px",
-            objectFit: "contain",
-            display: "block",
-          }}
-        />
+        {displaySrc && !imgError ? (
+          <img
+            ref={imgRef}
+            src={displaySrc}
+            alt="Sample analysis"
+            onLoad={handleImageLoad}
+            onError={(e) => {
+              if (showAnnotated && bestOriginal && displaySrc !== bestOriginal) {
+                e.target.src = bestOriginal;
+              } else {
+                setImgError(true);
+              }
+            }}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "320px",
+              objectFit: "contain",
+              display: "block",
+            }}
+          />
+        ) : (
+          <div style={{ color: "#94a3b8", fontSize: "12px", textAlign: "center", padding: "2rem" }}>
+            Sample photo preview unavailable
+          </div>
+        )}
 
         {/* Dynamic client-side bounding box overlay if showing original image with predictions */}
         {!isDirectAnnotated && showAnnotated && hasPredictions && naturalDimensions.width > 0 && (

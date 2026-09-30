@@ -204,11 +204,10 @@ function createAdvisory(counts) {
  * Returns { valid: false, reason: string } if it does not.
  * Returns { valid: true } (skips) if GEMINI_API_KEY is not set.
  */
-async function validateImageIsFeedOrSilage(imageBuffer, mimeType) {
+async function validateImageIsFeedOrSilage(imageBuffer, mimeType, sampleType = "feed") {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    // No key configured — skip validation rather than block the user
     console.warn("[Validation] GEMINI_API_KEY not set — skipping content check.");
     return { valid: true };
   }
@@ -216,81 +215,82 @@ async function validateImageIsFeedOrSilage(imageBuffer, mimeType) {
   const base64Image = imageBuffer.toString("base64");
   const safeMime = mimeType || "image/jpeg";
 
+  const targetName = sampleType === "silage" ? "silage / fermented forage" : "cattle feed / silage / fodder";
+
   const prompt = [
-    "You are a strict agricultural image classifier.",
-    "Look at the image carefully.",
-    "Answer ONLY with the single word YES or NO.",
-    "YES means: the image clearly shows animal feed (hay, grain, maize, TMR, pellets, silage, forage, or similar livestock feed material).",
-    "NO means: the image shows anything else — a diagram, document, screenshot, person, landscape, chart, flowchart, UI mockup, text, or any non-feed/silage subject.",
-    "Do NOT explain. Do NOT add punctuation. Just YES or NO.",
-  ].join(" ");
+    `You are a strict agricultural quality assurance AI inspector.`,
+    `Determine whether the provided image is a genuine photo of ${targetName}.`,
+    ``,
+    `Respond with ONLY ONE word: YES or NO.`,
+    ``,
+    `YES: The image clearly and predominantly shows agricultural cattle feed, silage, fodder, hay, straw, grains, TMR, or forage material.`,
+    `NO: The image shows a person, selfie, human face, clothing, room, tree/landscape background, vehicle, animal face/body, document, receipt, chart, screenshot, UI, or any other non-feed subject.`,
+    ``,
+    `Answer with ONLY the single word YES or NO:`
+  ].join("\n");
 
-  const body = {
-    contents: [
-      {
-        parts: [
-          { text: prompt },
-          {
-            inlineData: {
-              mimeType: safeMime,
-              data: base64Image,
-            },
-          },
-        ],
-      },
-    ],
-    generationConfig: {
-      temperature: 0,
-      maxOutputTokens: 4,
-    },
-  };
+  const modelsToTry = [
+    "gemini-3.5-flash",
+    "gemini-2.5-flash",
+    "gemini-flash-latest",
+    "gemini-3.1-pro-preview"
+  ];
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+  for (const model of modelsToTry) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                { inlineData: { mimeType: safeMime, data: base64Image } }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0,
+            maxOutputTokens: 10
+          }
+        }),
+        signal: controller.signal
+      });
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
+      clearTimeout(timeout);
 
-    if (!response.ok) {
-      console.warn("[Validation] Gemini check failed with status", response.status, "— skipping.");
+      if (!response.ok) {
+        console.warn(`[Validation] Model ${model} returned status ${response.status}`);
+        continue;
+      }
+
+      const json = await response.json();
+      const rawAnswer = (
+        json?.candidates?.[0]?.content?.parts?.[0]?.text || ""
+      ).trim().toUpperCase();
+
+      console.log(`[Validation] Model ${model} image check answer: "${rawAnswer}"`);
+
+      if (rawAnswer.includes("NO") || !rawAnswer.includes("YES")) {
+        return {
+          valid: false,
+          reason: `Invalid Image: The uploaded image does not appear to show ${targetName} (e.g. detected a person, background, or unrelated object). Please upload a real cattle feed or silage photo.`
+        };
+      }
+
       return { valid: true };
+    } catch (err) {
+      clearTimeout(timeout);
+      console.warn(`[Validation] Model ${model} check error:`, err.message);
     }
-
-    const json = await response.json();
-    const answer = (
-      json?.candidates?.[0]?.content?.parts?.[0]?.text || ""
-    ).trim().toUpperCase().replace(/[^A-Z]/g, "");
-
-    console.log(`[Validation] Gemini image-type answer: "${answer}"`);
-
-    if (answer.startsWith("NO")) {
-      return {
-        valid: false,
-        reason:
-          "The uploaded image does not appear to show animal feed or silage. " +
-          "Please upload a clear photo of the feed or silage sample you want to analyze.",
-      };
-    }
-
-    return { valid: true };
-  } catch (err) {
-    if (err.name === "AbortError") {
-      console.warn("[Validation] Gemini content check timed out — skipping.");
-    } else {
-      console.warn("[Validation] Gemini content check error:", err.message, "— skipping.");
-    }
-    // On any network/timeout error, fail open so legitimate users aren't blocked
-    return { valid: true };
-  } finally {
-    clearTimeout(timeout);
   }
+
+  return { valid: true };
 }
 
 async function detectWithGeminiDirect({ imageBuffer, mimeType, fileName }) {

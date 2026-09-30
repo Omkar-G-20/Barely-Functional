@@ -49,14 +49,18 @@ async function createSampleAnalysis(req, res) {
 
     let aiAnalysis = null;
     let annotatedImagePath = null;
+    let imageBase64DataUrl = null;
 
     if (req.file && req.file.path) {
+      const imageBuffer = fs.readFileSync(req.file.path);
+      imageBase64DataUrl = `data:${req.file.mimetype || "image/jpeg"};base64,${imageBuffer.toString("base64")}`;
+
       try {
-        const imageBuffer = fs.readFileSync(req.file.path);
         aiAnalysis = await analyzeImageWithGemini({
           imageBuffer,
           mimeType: req.file.mimetype || "image/jpeg",
-          fileName: req.file.originalname || req.file.filename
+          fileName: req.file.originalname || req.file.filename,
+          sampleType
         });
 
         if (aiAnalysis) {
@@ -75,7 +79,14 @@ async function createSampleAnalysis(req, res) {
           }
         }
       } catch (aiErr) {
-        console.warn("AI Visual analysis note:", aiErr.message);
+        console.warn("AI Visual analysis error:", aiErr.message);
+        // If content check rejected non-feed / selfie image, stop and report 422
+        if (aiErr.isContentValidationError || aiErr.statusCode === 422) {
+          return res.status(422).json({
+            success: false,
+            message: aiErr.message || "Invalid image: uploaded photo does not show cattle feed or silage."
+          });
+        }
       }
     }
 
@@ -105,12 +116,14 @@ async function createSampleAnalysis(req, res) {
       }
     }
 
+    const resolvedImagePath = imageBase64DataUrl || imageUrl(req, req.file);
+
     const analysis = await createAnalysis({
       userId: req.userId,
       sampleType,
-      imagePath: imageUrl(req, req.file),
-      annotatedImagePath,
-      outputImageDataUrl: aiAnalysis?.outputImageDataUrl || null,
+      imagePath: resolvedImagePath,
+      annotatedImagePath: annotatedImagePath || aiAnalysis?.annotatedImagePath || null,
+      outputImageDataUrl: aiAnalysis?.outputImageDataUrl || imageBase64DataUrl || null,
       aiAnalysis,
       measurements,
       ...result
