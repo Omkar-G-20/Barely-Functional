@@ -230,8 +230,10 @@ async function validateImageIsFeedOrSilage(imageBuffer, mimeType, sampleType = "
   ].join("\n");
 
   const modelsToTry = [
-    "gemini-1.5-pro",
-    "gemini-1.5-flash"
+    "gemini-3.5-flash",
+    "gemini-2.5-flash",
+    "gemini-flash-latest",
+    "gemini-3.1-pro-preview"
   ];
 
   for (const model of modelsToTry) {
@@ -305,6 +307,8 @@ async function detectWithGeminiDirect({ imageBuffer, mimeType, fileName }) {
     "2. 'discoloration': abnormal dark, burnt, brown, or black heating or spoilage patches.",
     "3. 'foreign_material': dirt clumps, plastic, stones, rope, weed seeds, or non-feed objects.",
     "",
+    "IMPORTANT: Only report genuine defects. If the feed is clean and normal, do NOT invent defects. Return an empty predictions array []. Normal plant stems, leaves, and corn kernels are NOT foreign material.",
+    "",
     "Respond ONLY with valid JSON in this exact structure:",
     "{",
     "  \"status\": \"good\" | \"average\" | \"poor\",",
@@ -316,6 +320,7 @@ async function detectWithGeminiDirect({ imageBuffer, mimeType, fileName }) {
     "    \"foreign_material\": 0",
     "  },",
     "  \"predictions\": [",
+    "    // Array of objects (ONLY if defects are found). If no defects, use []",
     "    {",
     "      \"class\": \"mould\" | \"discoloration\" | \"foreign_material\",",
     "      \"confidence\": 0.95,",
@@ -329,8 +334,10 @@ async function detectWithGeminiDirect({ imageBuffer, mimeType, fileName }) {
   ].join("\n");
 
   const modelsToTry = [
-    "gemini-1.5-pro",
-    "gemini-1.5-flash"
+    "gemini-3.5-flash",
+    "gemini-2.5-flash",
+    "gemini-flash-latest",
+    "gemini-3.1-pro-preview"
   ];
 
   for (const model of modelsToTry) {
@@ -382,12 +389,12 @@ async function detectWithGeminiDirect({ imageBuffer, mimeType, fileName }) {
         let x = 50, y = 50, width = 100, height = 100;
         if (Array.isArray(p.box_2d) && p.box_2d.length === 4) {
           const [ymin, xmin, ymax, xmax] = p.box_2d;
-          // Normalise 0-1000 or 0-1 to 0-1 (normalized coords)
+          // Normalise 0-1000 or 0-1 to pixel-relative coords
           const scale = Math.max(ymin, xmin, ymax, xmax) > 1 ? 1000 : 1;
-          const top = ymin / scale;
-          const left = xmin / scale;
-          const h = Math.max(0.01, (ymax - ymin) / scale);
-          const w = Math.max(0.01, (xmax - xmin) / scale);
+          const top = (ymin / scale) * 400;
+          const left = (xmin / scale) * 400;
+          const h = Math.max(10, ((ymax - ymin) / scale) * 400);
+          const w = Math.max(10, ((xmax - xmin) / scale) * 400);
           x = left + w / 2;
           y = top + h / 2;
           width = w;
