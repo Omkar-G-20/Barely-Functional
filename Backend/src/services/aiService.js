@@ -293,28 +293,219 @@ async function validateImageIsFeedOrSilage(imageBuffer, mimeType) {
   }
 }
 
+async function detectWithGeminiDirect({ imageBuffer, mimeType, fileName }) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+
+  const base64Image = imageBuffer.toString("base64");
+  const safeMime = mimeType || "image/jpeg";
+
+  const prompt = [
+    "You are an expert AI for cattle feed and silage visual quality inspection.",
+    "Analyze the provided image carefully and detect any visual defects:",
+    "1. 'mould': visible fungal spores, whitish, bluish, greenish, grey or fuzzy mould patches.",
+    "2. 'discoloration': abnormal dark, burnt, brown, or black heating or spoilage patches.",
+    "3. 'foreign_material': dirt clumps, plastic, stones, rope, weed seeds, or non-feed objects.",
+    "",
+    "Respond ONLY with valid JSON in this exact structure:",
+    "{",
+    "  \"status\": \"good\" | \"average\" | \"poor\",",
+    "  \"reason\": \"short description of visual condition\",",
+    "  \"confidence\": 92,",
+    "  \"counts\": {",
+    "    \"mould\": 0,",
+    "    \"discoloration\": 0,",
+    "    \"foreign_material\": 0",
+    "  },",
+    "  \"predictions\": [",
+    "    {",
+    "      \"class\": \"mould\" | \"discoloration\" | \"foreign_material\",",
+    "      \"confidence\": 0.95,",
+    "      \"box_2d\": [ymin, xmin, ymax, xmax]",
+    "    }",
+    "  ],",
+    "  \"advisory\": [",
+    "    \"Specific actionable farmer recommendation\"",
+    "  ]",
+    "}"
+  ].join("\n");
+
+  const modelsToTry = [
+    "gemini-3.5-flash",
+    "gemini-2.5-flash",
+    "gemini-flash-latest",
+    "gemini-3.1-pro-preview"
+  ];
+
+  for (const model of modelsToTry) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                { inlineData: { mimeType: safeMime, data: base64Image } }
+              ]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.1
+          }
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        console.warn(`[Gemini Direct Detection] Model ${model} returned status ${response.status}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) continue;
+
+      const parsed = JSON.parse(rawText);
+      const counts = parsed.counts || {
+        mould: 0,
+        discoloration: 0,
+        foreign_material: 0
+      };
+
+      const rawPreds = Array.isArray(parsed.predictions) ? parsed.predictions : [];
+      const predictions = rawPreds.map((p, idx) => {
+        let x = 50, y = 50, width = 100, height = 100;
+        if (Array.isArray(p.box_2d) && p.box_2d.length === 4) {
+          const [ymin, xmin, ymax, xmax] = p.box_2d;
+          // Normalise 0-1000 or 0-1 to pixel-relative coords
+          const scale = Math.max(ymin, xmin, ymax, xmax) > 1 ? 1000 : 1;
+          const top = (ymin / scale) * 400;
+          const left = (xmin / scale) * 400;
+          const h = Math.max(10, ((ymax - ymin) / scale) * 400);
+          const w = Math.max(10, ((xmax - xmin) / scale) * 400);
+          x = left + w / 2;
+          y = top + h / 2;
+          width = w;
+          height = h;
+        }
+
+        const className = p.class || p.label || "unknown";
+        if (counts[className] === undefined) {
+          counts[className] = (counts[className] || 0) + 1;
+        }
+
+        return {
+          id: `gemini-det-${idx + 1}`,
+          class: className,
+          confidence: typeof p.confidence === "number" ? p.confidence : 0.9,
+          x,
+          y,
+          width,
+          height
+        };
+      });
+
+      const totalDetections = (counts.mould || 0) + (counts.discoloration || 0) + (counts.foreign_material || 0);
+      const visualStatusCode = parsed.status || (totalDetections > 0 ? (counts.mould > 0 || counts.foreign_material > 0 ? "poor" : "average") : "good");
+
+      const visualStatus = {
+        label: visualStatusCode === "poor" ? "Poor" : visualStatusCode === "average" ? "Average" : "No visible issue detected",
+        code: visualStatusCode,
+        reason: parsed.reason || (totalDetections === 0 ? "No visible mould, discoloration, or foreign material detected." : `${totalDetections} anomalies detected by Gemini AI.`)
+      };
+
+      const advisory = Array.isArray(parsed.advisory) && parsed.advisory.length > 0
+        ? parsed.advisory.map((msg) => ({
+            type: "advisory",
+            title: "Gemini Quality Advisory",
+            message: msg
+          }))
+        : createAdvisory(counts);
+
+      return {
+        model: {
+          provider: "Google",
+          name: `Gemini ${model}`,
+          task: "Visual Defect Detection & Quality Assessment",
+          workflowId: model
+        },
+        sourceImage: {
+          fileName,
+          mimeType: safeMime,
+          sizeBytes: imageBuffer.length
+        },
+        outputImageBase64: null,
+        outputImageDataUrl: null,
+        predictions,
+        counts,
+        totalDetections: predictions.length || totalDetections,
+        visualStatus,
+        advisory,
+        usage: {
+          inputTokens: data.usageMetadata?.promptTokenCount || null,
+          outputTokens: data.usageMetadata?.candidatesTokenCount || null
+        },
+        rawOutput: rawText,
+        errorStatus: false
+      };
+    } catch (err) {
+      clearTimeout(timeout);
+      console.warn(`[Gemini Direct Detection] Model ${model} error:`, err.message);
+    }
+  }
+
+  return null;
+}
+
 async function analyzeImageWithGemini({
   imageBuffer,
   fileName,
   mimeType,
 }) {
-  if (!process.env.ROBOFLOW_API_KEY) {
-    throw new Error(
-      "ROBOFLOW_API_KEY is missing from Backend/.env"
-    );
-  }
-
   if (!Buffer.isBuffer(imageBuffer) || imageBuffer.length === 0) {
     throw new Error("A valid image buffer is required.");
   }
 
-  // ── Content gate: reject non-feed/silage images before the workflow ──
+  // ── Content gate: reject non-feed/silage images before deep analysis ──
   const contentCheck = await validateImageIsFeedOrSilage(imageBuffer, mimeType);
   if (!contentCheck.valid) {
     const err = new Error(contentCheck.reason);
     err.statusCode = 422;
     err.isContentValidationError = true;
     throw err;
+  }
+
+  // ── Attempt 1: Direct Gemini API Defect Detection ──
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const geminiDirectResult = await detectWithGeminiDirect({
+        imageBuffer,
+        fileName,
+        mimeType
+      });
+      if (geminiDirectResult) {
+        console.log("[Detection] Successfully analyzed with Gemini API Direct.");
+        return geminiDirectResult;
+      }
+    } catch (gErr) {
+      console.warn("[Detection] Gemini direct detection failed, falling back to Roboflow workflow:", gErr.message);
+    }
+  }
+
+  // ── Attempt 2: Roboflow Gemini Workflow Detection ──
+  if (!process.env.ROBOFLOW_API_KEY) {
+    throw new Error(
+      "Both GEMINI_API_KEY and ROBOFLOW_API_KEY are unconfigured in Backend/.env"
+    );
   }
 
   const workflowUrl =
