@@ -11,8 +11,12 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     async function initAuth() {
       const storedToken = getToken();
+      const storedUser = getStoredUser();
+
       if (storedToken) {
         setTokenState(storedToken);
+        if (storedUser) setUser(storedUser); // Instantly log in using local data
+
         try {
           const res = await api.getMe();
           if (res && res.user) {
@@ -20,10 +24,13 @@ export function AuthProvider({ children }) {
             setStoredUser(res.user);
           }
         } catch (err) {
-          setToken(null);
-          setStoredUser(null);
-          setUser(null);
-          setTokenState(null);
+          // If the token is invalid (401), api.js already clears the token.
+          // For other errors (like "User not found" due to in-memory DB resets on Vercel),
+          // we gracefully retain the local session to prevent unexpected logouts.
+          if (!getToken()) {
+            setUser(null);
+            setTokenState(null);
+          }
         }
       }
     }
