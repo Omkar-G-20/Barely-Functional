@@ -218,13 +218,13 @@ async function validateImageIsFeedOrSilage(imageBuffer, mimeType, sampleType = "
   const targetName = sampleType === "silage" ? "silage / fermented forage" : "cattle feed / silage / fodder";
 
   const prompt = [
-    `You are a strict agricultural quality assurance AI inspector.`,
-    `Determine whether the provided image is a genuine photo of ${targetName}.`,
+    `You are an agricultural quality assurance AI.`,
+    `Determine whether the provided image contains ${targetName} as its main subject.`,
     ``,
     `Respond with ONLY ONE word: YES or NO.`,
     ``,
-    `YES: The image clearly and predominantly shows agricultural cattle feed, silage, fodder, hay, straw, grains, TMR, or forage material.`,
-    `NO: The image shows a person, selfie, human face, clothing, room, tree/landscape background, vehicle, animal face/body, document, receipt, chart, screenshot, UI, or any other non-feed subject.`,
+    `YES: The image mainly shows cattle feed, silage, fodder, hay, straw, grains, TMR, or forage material. Respond YES even if there is mould, plastic strings, stones, foreign objects, or a farm/landscape background present, as long as the feed itself is clearly visible.`,
+    `NO: The image is entirely a selfie, document, receipt, screenshot, indoor room, or completely unrelated object with NO feed/silage visible.`,
     ``,
     `Answer with ONLY the single word YES or NO:`
   ].join("\n");
